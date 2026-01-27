@@ -1,3 +1,14 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    MicrophoneIcon,
+    StopIcon,
+    ArrowLeftOnRectangleIcon,
+    ChatBubbleLeftRightIcon,
+    PaperAirplaneIcon,
+    CpuChipIcon,
+    UserIcon
+} from '@heroicons/react/24/outline';
 import { interviewQuestions } from '../data/interviewQuestions';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -78,7 +89,9 @@ export default function InterviewRoom() {
     const getAIQuestion = async (history) => {
         setProcessing(true);
         try {
-            // Use local questions instead of API call
+            console.log("[Interview] Fetching next question for role:", config.role);
+
+            // Fetch from local data
             const roleQuestions = interviewQuestions[config.role] || interviewQuestions["HR"] || ["Tell me about yourself."];
             const historyTexts = (history || []).map(h => h.text);
             const availableQuestions = roleQuestions.filter(q => !historyTexts.includes(q));
@@ -92,7 +105,7 @@ export default function InterviewRoom() {
             speak(question);
         } catch (err) {
             console.error("Local Question Selection Error", err);
-            const fallback = "Tell me about your background and experience.";
+            const fallback = "I'm having a slight connectivity issue with my advanced brain, so let's stick to the basics. Tell me about your background.";
             const fallbackMsg = { role: 'ai', text: fallback, timestamp: new Date() };
             setTranscript(prev => [...prev, fallbackMsg]);
             setCurrentQuestion(fallback);
@@ -125,62 +138,61 @@ export default function InterviewRoom() {
 
         const updatedHistory = [...transcriptRef.current, newEntry];
 
-        try {
-            setProcessing(true);
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch(`${API_BASE_URL}/api/interviews/analyze-response`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    role: config.role,
-                    question: currentQuestion,
-                    answer: text
-                })
-            });
+        setProcessing(true);
 
-            if (!res.ok) throw new Error('Analysis failed');
-            const analysis = await res.json();
+        // --- LOCAL ANALYSIS LOGIC (Bypassing AI/API) ---
+        // We use a multi-step heuristic to provide immediate feedback
+        const lowerText = text.trim().toLowerCase();
+        const wordCount = lowerText.split(/\s+/).length;
 
-            // 2. Show Feedback
-            if (analysis.reply) {
-                const feedbackMsg = {
-                    role: 'ai',
-                    text: analysis.reply,
-                    timestamp: new Date(),
-                    isFeedback: true,
-                    score: analysis.score
-                };
-                setTranscript(prev => [...prev, feedbackMsg]);
+        // Define tech and behavioral keywords for basic "intelligence"
+        const keywords = [
+            "react", "html", "css", "javascript", "node", "mongo", "sql", "python", "java", "api", "rest", "component",
+            "state", "props", "hooks", "redux", "docker", "aws", "git", "frontend", "backend", "full stack",
+            "architecture", "agile", "scrum", "leadership", "team", "problem", "solution", "developed", "managed"
+        ];
 
-                setIsSpeaking(true);
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(analysis.reply);
-                utterance.onend = () => {
-                    setIsSpeaking(false);
-                    getAIQuestion(updatedHistory);
-                };
-                window.speechSynthesis.speak(utterance);
-            } else {
-                getAIQuestion(updatedHistory);
-            }
-        } catch (err) {
-            console.error("Analysis failed, using local fallback", err);
-            // Local Simple Analysis Fallback
-            const wordCount = text.trim().split(/\s+/).length;
-            const fallbackReply = wordCount > 10 ? "That's a detailed answer. Let's move on." : "I see, could you elaborate more in future answers?";
+        const matchingKeywords = keywords.filter(w => lowerText.includes(w));
 
-            const feedbackMsg = {
-                role: 'ai',
-                text: fallbackReply,
-                timestamp: new Date(),
-                isFeedback: true,
-                score: wordCount > 5 ? 7 : 4
-            };
+        // Calculate a mock score (1-10) based on detail and keywords
+        let baseScore = 6;
+        if (wordCount > 15) baseScore += 1;
+        if (wordCount > 30) baseScore += 1;
+        if (matchingKeywords.length > 2) baseScore += 1;
+        if (matchingKeywords.length > 5) baseScore += 1;
+        const finalScore = Math.min(baseScore, 10);
+
+        // Selection of dynamic-sounding replies
+        const feedBackReplies = [
+            "That's a solid explanation. I've noted down your approach.",
+            "I appreciate the detail in your response. Let's move forward.",
+            "That makes sense. Visualizing your experience there... good point.",
+            "Understood. Your perspective on that is quite clear.",
+            "Interesting. That fits well with what we look for in this role."
+        ];
+        const randomReply = feedBackReplies[Math.floor(Math.random() * feedBackReplies.length)];
+
+        const feedbackMsg = {
+            role: 'ai',
+            text: randomReply,
+            timestamp: new Date(),
+            isFeedback: true,
+            score: finalScore
+        };
+
+        // Artificial delay for a "thinking" effect
+        setTimeout(() => {
             setTranscript(prev => [...prev, feedbackMsg]);
-            getAIQuestion(updatedHistory);
-        } finally {
+            setIsSpeaking(true);
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(randomReply);
+            utterance.onend = () => {
+                setIsSpeaking(false);
+                getAIQuestion(updatedHistory);
+            };
+            window.speechSynthesis.speak(utterance);
             setProcessing(false);
-        }
+        }, 800);
     };
 
     const toggleListening = () => {
