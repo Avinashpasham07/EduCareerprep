@@ -46,6 +46,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Added for cron-job.org to keep server awake
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', authRoutes);

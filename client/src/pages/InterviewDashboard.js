@@ -24,6 +24,8 @@ export default function InterviewDashboard() {
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const [stats, setStats] = useState({ avgScore: 0, practiceTime: "0h 0m" });
+    const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const [loading, setLoading] = useState(true);
     const [isConfiguring, setIsConfiguring] = useState(false);
     const [config, setConfig] = useState({
         role: '',
@@ -34,7 +36,7 @@ export default function InterviewDashboard() {
         const fetchHistory = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                const res = await fetch('http://localhost:5000/api/interviews/history', {
+                const res = await fetch(`${API_BASE_URL}/api/interviews/history`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();

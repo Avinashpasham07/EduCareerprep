@@ -1,14 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-    MicrophoneIcon,
-    StopIcon,
-    ArrowLeftOnRectangleIcon,
-    CpuChipIcon,
-    ChatBubbleLeftRightIcon,
-    UserIcon,
-    PaperAirplaneIcon
-} from '@heroicons/react/24/outline';
+import { interviewQuestions } from '../data/interviewQuestions';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 export default function InterviewRoom() {
     const navigate = useNavigate();
@@ -86,26 +78,21 @@ export default function InterviewRoom() {
     const getAIQuestion = async (history) => {
         setProcessing(true);
         try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/interviews/generate-question', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    role: config.role,
-                    difficulty: config.difficulty,
-                    history: history.map(h => ({ role: h.role, text: h.text }))
-                })
-            });
-            const data = await res.json();
-            const question = data.question || "Tell me about yourself.";
+            // Use local questions instead of API call
+            const roleQuestions = interviewQuestions[config.role] || interviewQuestions["HR"] || ["Tell me about yourself."];
+            const historyTexts = (history || []).map(h => h.text);
+            const availableQuestions = roleQuestions.filter(q => !historyTexts.includes(q));
+
+            const pool = availableQuestions.length > 0 ? availableQuestions : roleQuestions;
+            const question = pool[Math.floor(Math.random() * pool.length)];
 
             const newAiMsg = { role: 'ai', text: question, timestamp: new Date() };
             setTranscript(prev => [...prev, newAiMsg]);
             setCurrentQuestion(question);
             speak(question);
         } catch (err) {
-            console.error("AI Error", err);
-            const fallback = "Could not connect to AI. Tell me about your background.";
+            console.error("Local Question Selection Error", err);
+            const fallback = "Tell me about your background and experience.";
             const fallbackMsg = { role: 'ai', text: fallback, timestamp: new Date() };
             setTranscript(prev => [...prev, fallbackMsg]);
             setCurrentQuestion(fallback);
@@ -138,11 +125,10 @@ export default function InterviewRoom() {
 
         const updatedHistory = [...transcriptRef.current, newEntry];
 
-        // 1. Analyze Answer first (Local Logic)
         try {
             setProcessing(true);
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/interviews/analyze-response', {
+            const res = await fetch(`${API_BASE_URL}/api/interviews/analyze-response`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -151,6 +137,8 @@ export default function InterviewRoom() {
                     answer: text
                 })
             });
+
+            if (!res.ok) throw new Error('Analysis failed');
             const analysis = await res.json();
 
             // 2. Show Feedback
@@ -160,7 +148,7 @@ export default function InterviewRoom() {
                     text: analysis.reply,
                     timestamp: new Date(),
                     isFeedback: true,
-                    score: analysis.score // Store score from analysis
+                    score: analysis.score
                 };
                 setTranscript(prev => [...prev, feedbackMsg]);
 
@@ -176,8 +164,22 @@ export default function InterviewRoom() {
                 getAIQuestion(updatedHistory);
             }
         } catch (err) {
-            console.error("Analysis failed", err);
+            console.error("Analysis failed, using local fallback", err);
+            // Local Simple Analysis Fallback
+            const wordCount = text.trim().split(/\s+/).length;
+            const fallbackReply = wordCount > 10 ? "That's a detailed answer. Let's move on." : "I see, could you elaborate more in future answers?";
+
+            const feedbackMsg = {
+                role: 'ai',
+                text: fallbackReply,
+                timestamp: new Date(),
+                isFeedback: true,
+                score: wordCount > 5 ? 7 : 4
+            };
+            setTranscript(prev => [...prev, feedbackMsg]);
             getAIQuestion(updatedHistory);
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -212,7 +214,7 @@ export default function InterviewRoom() {
 
         try {
             const token = localStorage.getItem('accessToken');
-            await fetch('http://localhost:5000/api/interviews/save', {
+            await fetch(`${API_BASE_URL}/api/interviews/save`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({

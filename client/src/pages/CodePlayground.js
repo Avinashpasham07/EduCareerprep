@@ -363,7 +363,7 @@ export default function CodePlayground() {
     };
 
     return (
-        <div className="h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 pt-24 pb-0 flex flex-col">
+        <div className="min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 pt-24 pb-0 flex flex-col">
             <div className="max-w-[1600px] w-full mx-auto px-6 flex-1 flex flex-col min-h-0 pb-6">
 
                 {/* Header */}
