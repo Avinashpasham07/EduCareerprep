@@ -129,7 +129,7 @@ export default function Roadmap() {
                     <label className="block text-sm font-bold text-black dark:text-white mb-2">
                         What do you want to become?
                     </label>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         <input
                             type="text"
                             value={role}
@@ -141,7 +141,7 @@ export default function Roadmap() {
                         <button
                             onClick={generateRoadmap}
                             disabled={!role || loading}
-                            className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                            className="w-full sm:w-auto px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 transition-all hover:scale-105 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

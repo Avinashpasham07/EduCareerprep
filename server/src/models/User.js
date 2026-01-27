@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const StatsSchema = new mongoose.Schema({
+  totalStudents: { type: Number, default: 0 },
+  placedStudents: { type: Number, default: 0 },
+  activeCompanies: { type: Number, default: 0 },
+  upcomingDrives: { type: Number, default: 0 }
+});
+
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -34,12 +41,7 @@ const UserSchema = new mongoose.Schema({
       videoLink: String,
       mapsLink: String,
       offCampusRecruiters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-      stats: {
-        totalStudents: { type: Number, default: 0 },
-        placedStudents: { type: Number, default: 0 },
-        activeCompanies: { type: Number, default: 0 },
-        upcomingDrives: { type: Number, default: 0 }
-      }
+      stats: StatsSchema
     },
     managedColleges: [{
       name: String,
@@ -54,12 +56,7 @@ const UserSchema = new mongoose.Schema({
       banner: String,
       videoLink: String,
       mapsLink: String,
-      stats: {
-        totalStudents: { type: Number, default: 0 },
-        placedStudents: { type: Number, default: 0 },
-        activeCompanies: { type: Number, default: 0 },
-        upcomingDrives: { type: Number, default: 0 }
-      }
+      stats: StatsSchema
     }],
 
     // Recruiter specific

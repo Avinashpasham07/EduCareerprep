@@ -50,12 +50,12 @@ export default function Login() {
       subtitle={`Sign in to your ${role} account`}
     >
       {/* Premium Tabs */}
-      <div className="bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-2xl flex mb-8 border border-slate-200 dark:border-slate-800">
+      <div className="bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-2xl flex mb-8 border border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide">
         {roles.map((r) => (
           <button
             key={r.id}
             onClick={() => setRole(r.id)}
-            className={`flex-1 flex items-center justify-center py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${role === r.id
+            className={`flex-1 min-w-[100px] flex items-center justify-center py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${role === r.id
               ? 'bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-md scale-100'
               : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/50'
               }`}

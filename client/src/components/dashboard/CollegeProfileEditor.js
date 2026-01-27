@@ -84,6 +84,9 @@ export default function CollegeProfileEditor({ onCancel, college }) {
             let res;
             if (college && (college._id || college.id)) {
                 res = await userApi.updateManagedCollege(college._id || college.id, payload);
+            } else if (!college && user?.role === 'counselor') {
+                // Special case: update the counselor's own primary college profile
+                res = await userApi.updateManagedCollege(user._id, payload);
             } else {
                 res = await userApi.addManagedCollege(payload);
             }

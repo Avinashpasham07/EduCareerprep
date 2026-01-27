@@ -149,17 +149,25 @@ export default function Notifications() {
             { label: 'Unread', count: unreadCount, icon: <ExclamationCircleIcon className="w-5 h-5" />, color: 'red' },
             { label: 'Admissions', count: notifications.filter(n => n.type === 'admission').length, icon: <AcademicCapIcon className="w-5 h-5" />, color: 'green' },
             { label: 'Jobs', count: notifications.filter(n => n.type === 'job').length, icon: <BriefcaseIcon className="w-5 h-5" />, color: 'purple' },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-              <div className={`p-2.5 rounded-lg bg-${stat.color}-50 dark:bg-${stat.color}-900/20 text-${stat.color}-600 dark:text-${stat.color}-400`}>
-                {stat.icon}
+          ].map((stat, i) => {
+            const colorClasses = {
+              blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+              red: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+              green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+              purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400'
+            };
+            return (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                <div className={`p-2.5 rounded-lg ${colorClasses[stat.color]}`}>
+                  {stat.icon}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-2xl font-bold text-black dark:text-white">{stat.count}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                <p className="text-2xl font-bold text-black dark:text-white">{stat.count}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Filters */}

@@ -8,12 +8,14 @@ import {
   MoonIcon,
   UserCircleIcon,
   Bars3Icon,
+  XMarkIcon,
   ArrowRightOnRectangleIcon,
   BriefcaseIcon,
   BuildingLibraryIcon,
   AcademicCapIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
@@ -53,6 +55,19 @@ export default function Layout({ children }) {
     }
   };
 
+  const MobileNavLink = ({ to, children, onClick, active }) => (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex items-center p-4 rounded-xl font-bold transition-all duration-200 ${active
+        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white'
+        }`}
+    >
+      {children}
+    </Link>
+  );
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans">
       <nav
@@ -65,11 +80,11 @@ export default function Layout({ children }) {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-3 group">
-                <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center  ">
-                  <span className="text-white font-bold text-xl font-display">E</span>
+              <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-lg sm:text-xl font-display">E</span>
                 </div>
-                <span className="font-display font-bold text-xl text-slate-900 dark:text-white tracking-tight">
+                <span className="font-display font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">
                   EduCareer<span className="text-primary-600">.</span>
                 </span>
               </Link>
@@ -104,36 +119,36 @@ export default function Layout({ children }) {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* Notification Icon */}
               {user && (
                 <Link to="/notifications" className="relative group">
-                  <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                    <BellIcon className="w-6 h-6" />
+                  <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                    <BellIcon className="w-5 h-5 sm:w-6 h-6" />
                     {/* Unread indicator dot (mock) */}
-                    <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
                   </button>
                 </Link>
               )}
 
-              {/* Theme Toggle */}
+              {/* Theme Toggle (Desktop Only - accessible via mobile menu on mobile) */}
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                className="hidden sm:flex w-10 h-10 rounded-xl items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               >
                 {theme === 'dark' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
               </button>
 
               {/* User Menu */}
               {user ? (
-                <div className="flex items-center space-x-4 pl-4 border-l border-slate-200 dark:border-slate-800">
+                <div className="flex items-center space-x-2 sm:space-x-4 pl-2 sm:pl-4 border-l border-slate-200 dark:border-slate-800">
                   <Link to="/profile">
-                    <div className="flex items-center space-x-3 cursor-pointer group">
+                    <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group">
                       <div className="text-right hidden sm:block">
                         <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{user.name}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize mt-1">{user.role}</p>
                       </div>
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors overflow-hidden">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors overflow-hidden shrink-0">
                         {user.profile?.avatar ? (
                           <img src={user.profile.avatar} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
@@ -146,7 +161,7 @@ export default function Layout({ children }) {
                     variant="ghost"
                     size="sm"
                     onClick={() => dispatch(logout())}
-                    className="text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                    className="hidden sm:flex text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors px-2"
                   >
                     <ArrowRightOnRectangleIcon className="w-5 h-5" />
                   </Button>
@@ -167,7 +182,6 @@ export default function Layout({ children }) {
                 </div>
               )}
 
-              {/* Mobile menu button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -177,16 +191,142 @@ export default function Layout({ children }) {
             </div>
           </div>
 
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden absolute top-full left-0 w-full glass-panel border-t border-slate-200 dark:border-slate-800 p-4 animate-fade-in-up">
-              <div className="flex flex-col space-y-2">
-                <Link to="/dashboard" className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-slate-700 dark:text-slate-200" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-                <Link to="/jobs" className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-slate-700 dark:text-slate-200" onClick={() => setMobileMenuOpen(false)}>Jobs</Link>
-                <Link to="/colleges" className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-slate-700 dark:text-slate-200" onClick={() => setMobileMenuOpen(false)}>Colleges</Link>
-              </div>
-            </div>
-          )}
+          {/* Mobile Navigation Overlay */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden"
+                />
+
+                {/* Menu Panel */}
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="fixed right-0 top-0 h-full w-[80%] max-w-sm bg-white dark:bg-slate-950 z-[70] shadow-2xl md:hidden flex flex-col"
+                >
+                  <div className="p-6 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                      <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
+                        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-lg">E</span>
+                        </div>
+                        <span className="font-bold text-lg text-slate-900 dark:text-white">EduCareer</span>
+                      </Link>
+                      <button
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500"
+                      >
+                        <XMarkIcon className="w-6 h-6" />
+                      </button>
+                    </div>
+
+                    {/* User Profile Info (Mobile) */}
+                    {user && (
+                      <div className="mb-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-200 dark:border-emerald-800 overflow-hidden">
+                            {user.profile?.avatar ? (
+                              <img src={user.profile.avatar} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              getRoleIcon(user.role)
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 dark:text-white leading-tight">{user.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Links */}
+                    <div className="flex-1 overflow-y-auto space-y-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Navigation</p>
+
+                      {(!user || user.role === 'student') && (
+                        <>
+                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Home</MobileNavLink>
+                          <MobileNavLink to="/jobs" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/jobs'}>Jobs</MobileNavLink>
+                          <MobileNavLink to="/colleges" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/colleges'}>Colleges</MobileNavLink>
+                          <MobileNavLink to="/interviews" onClick={() => setMobileMenuOpen(false)} active={location.pathname.startsWith('/interviews')}>AI Interview</MobileNavLink>
+                          <MobileNavLink to="/roadmap" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/roadmap'}>Career Roadmap</MobileNavLink>
+                          <MobileNavLink to="/playground" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/playground'}>Code Arena</MobileNavLink>
+                        </>
+                      )}
+
+                      {user?.role === 'employer' && (
+                        <>
+                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Dashboard</MobileNavLink>
+                          <MobileNavLink to="/jobs" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/jobs'}>Manage Jobs</MobileNavLink>
+                          <MobileNavLink to="/profile" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/profile'}>Company Profile</MobileNavLink>
+                        </>
+                      )}
+
+                      {user?.role === 'counselor' && (
+                        <>
+                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Dashboard</MobileNavLink>
+                          <MobileNavLink to="/colleges" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/colleges'}>My Institutions</MobileNavLink>
+                        </>
+                      )}
+
+                      <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Account</p>
+                        <MobileNavLink to="/profile" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/profile'}>My Profile</MobileNavLink>
+                        <MobileNavLink to="/notifications" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/notifications'}>Notifications</MobileNavLink>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                      <button
+                        onClick={() => {
+                          setTheme(theme === 'dark' ? 'light' : 'dark');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          {theme === 'dark' ? <MoonIcon className="w-5 h-5 text-indigo-500" /> : <SunIcon className="w-5 h-5 text-amber-500" />}
+                          <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+                        </div>
+                        <div className={`w-10 h-5 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-primary-600' : 'bg-slate-300'}`}>
+                          <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${theme === 'dark' ? 'left-6' : 'left-1'}`} />
+                        </div>
+                      </button>
+
+                      {user ? (
+                        <button
+                          onClick={() => {
+                            dispatch(logout());
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-600 font-bold text-sm"
+                        >
+                          <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                          <span>Logout</span>
+                        </button>
+                      ) : (
+                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                          <button className="w-full py-4 bg-primary-600 text-white rounded-xl font-bold shadow-lg shadow-primary-500/20">
+                            Sign In
+                          </button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 

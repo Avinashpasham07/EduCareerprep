@@ -37,13 +37,13 @@ export default function CollegeDashboard() {
     const [targetedJobs, setTargetedJobs] = useState([]);
     const [recruiters, setRecruiters] = useState([]);
 
-    // Derived Recent Activity from Real Data
-    const recentActivity = targetedJobs.map(job => ({
+    // Derived Recent Activity from Real Data - Safely handle non-array state
+    const recentActivity = Array.isArray(targetedJobs) ? targetedJobs.map(job => ({
         id: job._id || job.id,
         text: `${job.company} scheduled a drive for ${job.title}`,
         time: new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
         type: "drive"
-    })).slice(0, 5);
+    })).slice(0, 5) : [];
 
     useEffect(() => {
         // Fetch stats logic here
@@ -68,13 +68,20 @@ export default function CollegeDashboard() {
                         totalStudents: { ...prev.totalStudents, value: statsRes.data.totalStudents || 0 },
                         placedStudents: { ...prev.placedStudents, value: statsRes.data.placedStudents || 0 },
                         activeCompanies: { ...prev.activeCompanies, value: statsRes.data.activeCompanies || 0 },
-                        upcomingDrives: { ...prev.upcomingDrives, value: jobsRes.data.length || 0 }
+                        upcomingDrives: { ...prev.upcomingDrives, value: (jobsRes.data.jobs?.length || jobsRes.data.length || 0) }
                     }));
                 }
-                setTargetedJobs(jobsRes.data);
-                setRecruiters(recRes.data);
+
+                // Handle both direct array and paginated response { jobs: [], total }
+                const jobsData = jobsRes.data.jobs || (Array.isArray(jobsRes.data) ? jobsRes.data : []);
+                const recData = recRes.data.recruiters || (Array.isArray(recRes.data) ? recRes.data : []);
+
+                setTargetedJobs(jobsData);
+                setRecruiters(recData);
             } catch (err) {
                 console.error("Failed to fetch dashboard data", err);
+                setTargetedJobs([]);
+                setRecruiters([]);
             } finally {
                 setLoading(false);
             }
@@ -149,9 +156,9 @@ export default function CollegeDashboard() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col md:flex-row gap-8">
 
-                    {/* Left Sidebar Navigation */}
+                    {/* Navigation */}
                     <nav className="w-full md:w-64 flex-shrink-0">
-                        <div className="sticky top-24 space-y-1">
+                        <div className="sticky top-24 flex md:flex-col overflow-x-auto md:overflow-x-visible scrollbar-hide border-b md:border-b-0 border-slate-200 dark:border-slate-800 md:space-y-1">
                             {tabs.map(tab => {
                                 const isActive = activeTab === tab;
                                 return (
@@ -159,10 +166,10 @@ export default function CollegeDashboard() {
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`
-                                            group w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-r-lg transition-all duration-200 border-l-[3px]
+                                            group flex items-center gap-3 px-6 py-4 md:px-4 md:py-3 text-sm font-bold transition-all duration-200 whitespace-nowrap
                                             ${isActive
-                                                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                                                : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/20 md:border-l-[3px] border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm border-b-2 md:border-b-0'
+                                                : 'border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                                             }
                                         `}
                                     >
@@ -171,7 +178,6 @@ export default function CollegeDashboard() {
                                             {tab === 'Manage Profile' && <BuildingLibraryIcon className="w-5 h-5" />}
                                             {tab === 'Students' && <UsersIcon className="w-5 h-5" />}
                                             {tab === 'Hiring Partners' && <BriefcaseIcon className="w-5 h-5" />}
-
                                         </span>
                                         {tab}
                                     </button>

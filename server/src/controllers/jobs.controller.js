@@ -1,5 +1,6 @@
 const Job = require('../models/Job');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 // Create a new job
 exports.createJob = async (req, res, next) => {
@@ -33,43 +34,39 @@ exports.getAllJobs = async (req, res, next) => {
         }
 
         // 2. Targeted Hiring Logic
-        const User = require('../models/User');
-        const generalQuery = { $or: [{ hiringType: 'general' }, { hiringType: { $exists: false } }, { hiringType: null }] };
+        let orParts = [
+            { hiringType: 'general' },
+            { hiringType: { $exists: false } },
+            { hiringType: null },
+            { hiringType: 'off-campus' }
+        ];
 
-        if (!req.user) {
-            // Guest: only see general jobs
-            Object.assign(filters, generalQuery);
-        } else {
-            // Logged in user customization
-            if (req.user.role === 'student') {
-                const student = await User.findById(req.user.id);
-                const collegeId = student?.profile?.collegeId;
-
-                filters.$or = [
-                    generalQuery,
-                    { hiringType: 'off-campus' }, // Off-campus is public but for students
-                    {
-                        hiringType: 'on-campus',
-                        targetColleges: collegeId // Targeted on-campus drive
+        if (!req.user || req.user.role === 'student') {
+            // Students/Guests see general and off-campus jobs
+            if (req.user?.role === 'student') {
+                try {
+                    const student = await User.findById(req.user.id).select('profile.collegeId');
+                    if (student?.profile?.collegeId) {
+                        orParts.push({ hiringType: 'on-campus', targetColleges: student.profile.collegeId });
                     }
-                ];
-            } else if (req.user.role === 'counselor') {
-                // Counselors see everything targeted at them + off-campus
-                filters.$or = [
-                    { hiringType: 'off-campus' },
-                    { targetColleges: req.user.id }
-                ];
-            } else {
-                // Employers/Admins: See general + off-campus + their own
-                filters.$or = [
-                    generalQuery,
-                    { hiringType: 'off-campus' },
-                    { owner: req.user.id }
-                ];
+                } catch (userErr) {
+                    console.error("[API] Error fetching student collegeId for filters:", userErr.message);
+                }
             }
+            filters.$or = orParts;
+        } else if (req.user.role === 'counselor') {
+            filters.$or = [
+                { hiringType: 'off-campus' },
+                { targetColleges: req.user.id }
+            ];
+        } else {
+            filters.$or = [
+                ...orParts,
+                { owner: req.user.id }
+            ];
         }
 
-        console.log("getAllJobs Final Filters:", JSON.stringify(filters, null, 2));
+        console.log(`[API] getAllJobs Filters for ${req.user?.role || 'guest'}:`, JSON.stringify(filters));
 
         // Handle limit if provided
         // Handle pagination
@@ -78,12 +75,13 @@ exports.getAllJobs = async (req, res, next) => {
         const skip = (page - 1) * limit;
 
         const totalJobs = await Job.countDocuments(filters);
-
         const jobs = await Job.find(filters)
             .populate('owner', 'name profile.recruiterProfile')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+
+        console.log(`[API] Found ${jobs.length} jobs out of ${totalJobs} total matching filters`);
 
         res.json({
             jobs,
@@ -111,7 +109,6 @@ exports.getMyJobs = async (req, res, next) => {
 // Toggle save job
 exports.toggleSaveJob = async (req, res, next) => {
     try {
-        const User = require('../models/User');
         const user = await User.findById(req.user.id);
         const jobId = req.params.id;
 
@@ -135,7 +132,6 @@ exports.toggleSaveJob = async (req, res, next) => {
 // Apply for a job
 exports.applyJob = async (req, res, next) => {
     try {
-        const User = require('../models/User');
         const jobId = req.params.id;
         const userId = req.user.id;
 
@@ -165,7 +161,20 @@ exports.applyJob = async (req, res, next) => {
             status: 'applied',
             appliedDate: new Date()
         });
-        await user.save();
+
+        try {
+            await user.save();
+        } catch (saveErr) {
+            console.error('[API] Failed to save user after application:', JSON.stringify(saveErr.errors || saveErr, null, 2));
+            // Rollback job application if user save fails to keep DB consistent
+            job.applications.pop();
+            await job.save();
+            return res.status(500).json({
+                message: 'Failed to update user profile: Validation Error',
+                error: saveErr.message,
+                details: saveErr.errors ? Object.keys(saveErr.errors).map(k => `${k}: ${saveErr.errors[k].message}`) : undefined
+            });
+        }
 
         // --- TRIGGER NOTIFICATIONS ---
         try {
@@ -197,7 +206,10 @@ exports.applyJob = async (req, res, next) => {
 
         res.json({ message: 'Application submitted successfully', appliedJobs: user.appliedJobs });
     } catch (err) {
-        next(err);
+        console.error('[API] Critical Apply Job Error:', err);
+        if (!res.headersSent) {
+            res.status(500).json({ message: 'Failed to apply: ' + err.message, error: err.message });
+        }
     }
 };
 

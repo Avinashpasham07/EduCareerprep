@@ -29,18 +29,21 @@ export default function RecruiterDashboard({ user }) {
     const fetchMyJobs = async () => {
         try {
             const res = await userApi.getMyJobs();
-            setJobs(res.data);
+            // Handle both direct array and wrapped response
+            const jobsData = res.data.jobs || (Array.isArray(res.data) ? res.data : []);
+            setJobs(jobsData);
         } catch (err) {
             console.error(err);
+            setJobs([]);
         } finally {
             setLoading(false);
         }
     };
 
     const stats = [
-        { label: 'Active Jobs', value: jobs.length, icon: Icons.briefcase, color: 'bg-emerald-500' },
-        { label: 'Total Applicants', value: jobs.reduce((acc, job) => acc + (job.applications?.length || 0), 0), icon: Icons.users, color: 'bg-green-500' },
-        { label: 'Views', value: jobs.reduce((acc, job) => acc + (job.views || 0), 0), icon: Icons.dashboard, color: 'bg-teal-500' },
+        { label: 'Active Jobs', value: Array.isArray(jobs) ? jobs.length : 0, icon: Icons.briefcase, color: 'bg-emerald-500' },
+        { label: 'Total Applicants', value: Array.isArray(jobs) ? jobs.reduce((acc, job) => acc + (job.applications?.length || 0), 0) : 0, icon: Icons.users, color: 'bg-green-500' },
+        { label: 'Views', value: Array.isArray(jobs) ? jobs.reduce((acc, job) => acc + (job.views || 0), 0) : 0, icon: Icons.dashboard, color: 'bg-teal-500' },
     ];
 
     return (
@@ -115,12 +118,12 @@ export default function RecruiterDashboard({ user }) {
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden min-h-[600px]">
 
                     {/* Tabs Header */}
-                    <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl">
+                    <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl overflow-x-auto scrollbar-hide">
                         {['overview', 'post-job', 'profile'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-8 py-5 text-sm font-bold uppercase tracking-wide transition-all relative ${activeTab === tab
+                                className={`px-8 py-5 text-sm font-bold uppercase tracking-wide transition-all relative whitespace-nowrap ${activeTab === tab
                                     ? 'text-emerald-600 dark:text-emerald-400'
                                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}

@@ -244,7 +244,8 @@ exports.getUserById = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        console.log('Update Profile Request Body:', JSON.stringify(req.body, null, 2));
+        console.log(`[API] Update Profile for User: ${userId} (${req.user.role})`);
+
         const updates = req.body;
 
         // Security: Prevent updating sensitive fields
@@ -259,8 +260,12 @@ exports.updateProfile = async (req, res, next) => {
         ).select('-passwordHash')
             .populate('profile.collegeId', 'name profile.location');
 
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        console.log(`[API] Profile updated successfully for ${userId}`);
         res.json(user);
     } catch (err) {
+        console.error(`[API] Update Profile Error (${req.user.id}):`, err.message);
         next(err);
     }
 };
@@ -553,7 +558,12 @@ exports.addManagedCollege = async (req, res, next) => {
             return res.status(400).json({ message: 'Maximum 10 colleges allowed per profile' });
         }
 
-        user.profile.managedColleges.push(req.body);
+        const newCollege = {
+            ...req.body,
+            stats: { totalStudents: 0, placedStudents: 0, activeCompanies: 0, upcomingDrives: 0 }
+        };
+
+        user.profile.managedColleges.push(newCollege);
         await user.save();
         res.status(201).json(user);
     } catch (err) { next(err); }
@@ -561,27 +571,59 @@ exports.addManagedCollege = async (req, res, next) => {
 
 exports.updateManagedCollege = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
+        const userId = req.user.id;
         const collegeId = req.params.id;
+        console.log(`[API] Update Managed College: ${collegeId} by user ${userId}`);
 
-        const index = user.profile.managedColleges.findIndex(c => c._id.toString() === collegeId);
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const index = user.profile.managedColleges.findIndex(c => c._id?.toString() === collegeId || c.id === collegeId);
 
         if (index === -1) {
+            // Check if it's the primary college profile (the user itself)
             if (user._id.toString() === collegeId) {
+                console.log(`[API] Updating Primary College Profile for user ${userId}`);
                 user.name = req.body.name || user.name;
+                if (!user.profile) user.profile = {};
                 user.profile.location = req.body.location || user.profile.location;
-                user.profile.collegeProfile = { ...user.profile.collegeProfile, ...req.body };
+
+                // Safe update for collegeProfile
+                if (!user.profile.collegeProfile) user.profile.collegeProfile = { stats: { totalStudents: 0, placedStudents: 0, activeCompanies: 0, upcomingDrives: 0 } };
+
+                // Update specific fields instead of spreading the whole object
+                const fields = ['description', 'website', 'phone', 'established', 'courses', 'logo', 'campusPhotos', 'videoLink', 'mapsLink'];
+                fields.forEach(field => {
+                    if (req.body[field] !== undefined) {
+                        user.profile.collegeProfile[field] = req.body[field];
+                    }
+                });
             } else {
                 return res.status(404).json({ message: 'College not found' });
             }
         } else {
+            // Update managed college in array
+            console.log(`[API] Updating Managed College at index ${index} for user ${userId}`);
             const existing = user.profile.managedColleges[index];
-            Object.assign(existing, req.body);
+            const fields = ['name', 'location', 'description', 'website', 'phone', 'established', 'courses', 'logo', 'campusPhotos', 'videoLink', 'mapsLink'];
+            fields.forEach(field => {
+                if (req.body[field] !== undefined) {
+                    existing[field] = req.body[field];
+                }
+            });
+            // Ensure stats exist for the managed college
+            if (!existing.stats) {
+                existing.stats = { totalStudents: 0, placedStudents: 0, activeCompanies: 0, upcomingDrives: 0 };
+            }
         }
 
         await user.save();
+        console.log(`[API] Managed college update saved successfully for ${userId}`);
         res.json(user);
-    } catch (err) { next(err); }
+    } catch (err) {
+        console.error(`[API] Update Managed College Error (${req.user.id}):`, err.message);
+        next(err);
+    }
 };
 
 exports.deleteManagedCollege = async (req, res, next) => {

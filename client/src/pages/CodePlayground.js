@@ -367,28 +367,28 @@ export default function CodePlayground() {
             <div className="max-w-[1600px] w-full mx-auto px-6 flex-1 flex flex-col min-h-0 pb-6">
 
                 {/* Header */}
-                <div className="mb-6 flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="mb-6 flex flex-col lg:flex-row lg:items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
                             <CommandLineIcon className="w-6 h-6 text-primary-600" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-black dark:text-white font-display">
-                                Code Arena <span className="text-xs font-normal text-slate-500 ml-2 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">Beta</span>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white font-display">
+                                Code Arena <span className="text-[10px] font-normal text-slate-500 ml-2 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">Beta</span>
                             </h1>
                             {user?.solvedChallenges?.length > 0 && (
-                                <div className="ml-0 mt-2 flex items-center gap-1.5 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full border border-green-100 dark:border-green-800/50 text-xs font-bold w-fit">
+                                <div className="mt-1 flex items-center gap-1.5 px-3 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full border border-green-100 dark:border-green-800/50 text-[10px] font-bold w-fit">
                                     <CheckCircleIcon className="w-3.5 h-3.5" />
                                     {user.solvedChallenges.length} Solved Achievements
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="flex gap-3">
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-all min-w-[140px] justify-between">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative group flex-1 sm:flex-none">
+                            <button className="w-full flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-all min-w-[140px] justify-between">
                                 <span className={selectedLanguage.id === 'javascript' ? 'text-yellow-600' : 'text-blue-500'}>{selectedLanguage.name}</span>
-                                <ChevronDownIcon className="w-4 h-4" />
+                                <ChevronDownIcon className="w-4 h-4 text-slate-400" />
                             </button>
                             <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all z-50">
                                 {LANGUAGES.map(lang => (
@@ -406,13 +406,13 @@ export default function CodePlayground() {
 
                         <button
                             onClick={() => setCode(selectedProblem.starterCode[selectedLanguage.id])}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                         >
                             <ArrowPathIcon className="w-4 h-4" /> Reset
                         </button>
                         <button
                             onClick={runCode}
-                            className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg shadow-green-500/30 transition-all active:scale-95"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg shadow-green-500/30 transition-all active:scale-95"
                         >
                             <PlayIcon className="w-4 h-4" /> Run
                         </button>
