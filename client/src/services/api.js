@@ -42,6 +42,7 @@ api.interceptors.response.use(
 export const userApi = {
     getProfile: () => api.get('/user/profile'),
     getProfileById: (id) => api.get(`/user/profile/${id}`),
+    updateProfile: (data) => api.put('/user/profile', data),
     getColleges: () => api.get('/user/colleges'),
     getCollegeById: (id) => api.get(`/user/colleges/${id}`),
     toggleSaveCollege: (id) => api.post(`/user/colleges/save/${id}`),
