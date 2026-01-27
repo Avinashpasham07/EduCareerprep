@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 EduCareerPrep (MERN)
 
 Monorepo with `client` (React + Redux Toolkit + Tailwind) and `server` (Express + MongoDB + JWT).
@@ -12,3 +13,6 @@ Endpoints
 - Auth: `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`.
 - Docs: `/api/docs`.
 
+=======
+# EduCareerprep
+>>>>>>> 042926c9b8d7349dcbef82a9e95a2ed371f501ab
