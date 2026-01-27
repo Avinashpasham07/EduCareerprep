@@ -24,8 +24,13 @@ const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000').split
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
+    // Allow localhost during development
     if (origin.startsWith('http://localhost:')) return callback(null, true);
+    // Allow the specific CLIENT_URL set in env
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any Vercel preview/deployment for this project (temporary for easy setup)
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
