@@ -16,7 +16,11 @@ import {
   BriefcaseIcon,
   BoltIcon,
   GlobeAmericasIcon,
-  StarIcon
+  StarIcon,
+  QuestionMarkCircleIcon,
+  NewspaperIcon,
+  ChevronDownIcon,
+  FireIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -298,7 +302,7 @@ export default function Home() {
                   The Solution
                 </div>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                  EduCareer bridges the gap using AI.
+                  EduCareerprep. bridges the gap using AI.
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-8">
                   We don't just list jobs. We analyze your potential, recommend personalized learning paths, and verify your skills so you stand out instantly.
@@ -386,19 +390,40 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative">
+            {[
+              {
+                name: "Rohan Mehta",
+                role: "Frontend Developer @ Microsoft",
+                image: "/rohan.png",
+                text: "The AI mock interviews were a game changer. I received instant feedback on my technical answers and body language, which helped me stay calm during the actual interview."
+              },
+              {
+                name: "Ananya Singh",
+                role: "Data Scientist @ Amazon",
+                image: "/ananya.png",
+                text: "I love the career roadmap feature! It gave me a clear path of what skills I needed to learn and how to verify them. I got hired within 3 months of joining."
+              },
+              {
+                name: "Karan Verma",
+                role: "Backend Engineer @ Zomato",
+                image: "/karan.png",
+                text: "Being able to apply directly to partner companies through the platform saved me so much time. The Skill Verification badge really made my profile stand out to recruiters."
+              }
+            ].map((testimonial, i) => (
+              <div key={i} className="p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group hover:shadow-2xl transition-all duration-500">
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map(s => <StarIcon key={s} className="w-5 h-5 text-yellow-400 fill-yellow-400" />)}
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 mb-6 italic">
-                  "EduCareer transformed my job search. The AI mock interviews gave me the confidence I needed to crack my Google interview."
+                <p className="text-slate-600 dark:text-slate-300 mb-6 italic leading-relaxed">
+                  "{testimonial.text}"
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-500/20 group-hover:border-primary-500 transition-colors">
+                    <img src={testimonial.image} alt={testimonial.name} className="w-full h-full object-cover" />
+                  </div>
                   <div>
-                    <div className="font-bold text-slate-900 dark:text-white">Alex Johnson</div>
-                    <div className="text-xs text-slate-500">SDE @ Google</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{testimonial.name}</div>
+                    <div className="text-xs text-slate-500">{testimonial.role}</div>
                   </div>
                 </div>
               </div>
@@ -406,6 +431,65 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
+      {/* --- TRUSTED PARTNERS --- */}
+      <section className="py-20 bg-white dark:bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-10">Trusted by Global Tech Leaders</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+            {/* Mock Company Logos */}
+            {['Google', 'Amazon', 'Microsoft', 'Infosys', 'TCS', 'Wipro'].map((company, i) => (
+              <div key={i} className="flex items-center justify-center p-4 border border-slate-100 dark:border-slate-800 rounded-2xl">
+                <span className="text-xl font-black text-slate-800 dark:text-slate-200 tracking-tighter">{company}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- FAQ SECTION --- */}
+      <section className="py-24 bg-slate-50 dark:bg-slate-900/30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 font-display">
+              Have <span className="text-primary-600">Questions?</span>
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400">Everything you need to know about the EduCareerprep platform.</p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { q: "How does the AI Mock Interview work?", a: "Our AI analysis system uses natural language processing to evaluate your technical accuracy, communication style, and filler word usage in real-time." },
+              { q: "Is the platform free for students?", a: "Yes, the core features including job applications, career roadmap, and basic assessments are completely free for students." },
+              { q: "How are colleges connected?", a: "Colleges can register to track their students' placement progress, verify credentials, and connect directly with partner recruiters." },
+              { q: "Can I use the resume builder for free?", a: "Absolutely. Our AI-powered resume builder helps you optimize your profile for ATS systems at no cost." }
+            ].map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+              >
+                <details className="group">
+                  <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                    <span className="font-bold text-slate-900 dark:text-white">{faq.q}</span>
+                    <span className="transition group-open:rotate-180">
+                      <ChevronDownIcon className="w-5 h-5 text-slate-400 text-primary-600" />
+                    </span>
+                  </summary>
+                  <div className="px-6 pb-6 text-slate-600 dark:text-slate-400 text-sm leading-relaxed border-t border-slate-50 dark:border-slate-800 pt-4">
+                    {faq.a}
+                  </div>
+                </details>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- INDUSTRY MENTORS --- */}
+
 
       {/* --- CTA SECTION --- */}
       <section className="py-32 relative overflow-hidden">
@@ -420,7 +504,7 @@ export default function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-b from-black to-slate-400">career journey?</span>
           </h2>
           <p className="text-xl text-black mb-12 max-w-2xl mx-auto">
-            Join 10,000+ students and recruiters connecting on EduCareer today.
+            Join 10,000+ students and recruiters connecting on EduCareerprep. today.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

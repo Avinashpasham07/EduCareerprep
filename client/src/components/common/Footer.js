@@ -9,7 +9,7 @@ const Footer = () => {
                     <div className="col-span-2">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold">E</div>
-                            <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">EduCareer</span>
+                            <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">EduCareerprep.</span>
                         </div>
                         <p className="text-slate-500 max-w-xs">
                             Empowering the next generation of talent with AI-driven tools and direct industry connections.
@@ -33,7 +33,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="pt-8 border-t border-slate-100 dark:border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-sm">
-                    <span>&copy; 2026 EduCareer Platform. Crafted with precision.</span>
+                    <span>&copy; 2026 EduCareerprep. Platform. Crafted with precision.</span>
                     <div className="flex gap-4">
                         <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800 text-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-600 transition-all group">
                             <span className="sr-only">LinkedIn</span>

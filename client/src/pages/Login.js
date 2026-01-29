@@ -128,7 +128,7 @@ export default function Login() {
 
       <div className="mt-8 text-center">
         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-          New to EduCareer?
+          New to EduCareerprep.?
           <Link to="/register" className="text-primary-600 font-bold ml-1 hover:underline">
             Create an account
           </Link>

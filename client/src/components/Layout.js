@@ -90,94 +90,96 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans">
       {/* Bottom Navigation (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-        <div className="glass-panel border border-white/20 dark:border-slate-800/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-3xl h-20 flex items-center justify-around relative overflow-hidden">
-          {/* Animated Background Highlight */}
-          <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none"></div>
+      {location.pathname !== '/' && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
+          <div className="glass-panel border border-white/20 dark:border-slate-800/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-3xl h-20 flex items-center justify-around relative overflow-hidden">
+            {/* Animated Background Highlight */}
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none"></div>
 
-          {/* Role-based Navigation Content */}
-          {(!user || user.role === 'student') && (
-            <>
-              <BottomTab
-                to="/dashboard"
-                icon={HomeIcon}
-                activeIcon={HomeIconSolid}
-                label="Home"
-                active={location.pathname === '/dashboard'}
-              />
-              <BottomTab
-                to="/jobs"
-                icon={BriefcaseIcon}
-                activeIcon={BriefcaseIconSolid}
-                label="Jobs"
-                active={location.pathname === '/jobs'}
-              />
-              <BottomTab
-                to="/colleges"
-                icon={BuildingLibraryIcon}
-                activeIcon={BuildingLibraryIconSolid}
-                label="Colleges"
-                active={location.pathname === '/colleges'}
-              />
-              <BottomTab
-                to="/interviews"
-                icon={AcademicCapIcon}
-                activeIcon={AcademicCapIconSolid}
-                label="Interview"
-                active={location.pathname.startsWith('/interviews')}
-              />
-            </>
-          )}
+            {/* Role-based Navigation Content */}
+            {(!user || user.role === 'student') && (
+              <>
+                <BottomTab
+                  to="/dashboard"
+                  icon={HomeIcon}
+                  activeIcon={HomeIconSolid}
+                  label="Home"
+                  active={location.pathname === '/dashboard'}
+                />
+                <BottomTab
+                  to="/jobs"
+                  icon={BriefcaseIcon}
+                  activeIcon={BriefcaseIconSolid}
+                  label="Jobs"
+                  active={location.pathname === '/jobs'}
+                />
+                <BottomTab
+                  to="/colleges"
+                  icon={BuildingLibraryIcon}
+                  activeIcon={BuildingLibraryIconSolid}
+                  label="Colleges"
+                  active={location.pathname === '/colleges'}
+                />
+                <BottomTab
+                  to="/interviews"
+                  icon={AcademicCapIcon}
+                  activeIcon={AcademicCapIconSolid}
+                  label="Interview"
+                  active={location.pathname.startsWith('/interviews')}
+                />
+              </>
+            )}
 
-          {user?.role === 'employer' && (
-            <>
-              <BottomTab
-                to="/dashboard"
-                icon={HomeIcon}
-                activeIcon={HomeIconSolid}
-                label="Home"
-                active={location.pathname === '/dashboard'}
-              />
-              <BottomTab
-                to="/profile"
-                icon={UserCircleIcon}
-                activeIcon={UserCircleIconSolid}
-                label="Profile"
-                active={location.pathname === '/profile'}
-              />
-            </>
-          )}
+            {user?.role === 'employer' && (
+              <>
+                <BottomTab
+                  to="/dashboard"
+                  icon={HomeIcon}
+                  activeIcon={HomeIconSolid}
+                  label="Home"
+                  active={location.pathname === '/dashboard'}
+                />
+                <BottomTab
+                  to="/profile"
+                  icon={UserCircleIcon}
+                  activeIcon={UserCircleIconSolid}
+                  label="Profile"
+                  active={location.pathname === '/profile'}
+                />
+              </>
+            )}
 
-          {user?.role === 'counselor' && (
-            <>
-              <BottomTab
-                to="/dashboard"
-                icon={HomeIcon}
-                activeIcon={HomeIconSolid}
-                label="Home"
-                active={location.pathname === '/dashboard'}
-              />
-              <BottomTab
-                to="/profile"
-                icon={UserCircleIcon}
-                activeIcon={UserCircleIconSolid}
-                label="Profile"
-                active={location.pathname === '/profile'}
-              />
-            </>
-          )}
+            {user?.role === 'counselor' && (
+              <>
+                <BottomTab
+                  to="/dashboard"
+                  icon={HomeIcon}
+                  activeIcon={HomeIconSolid}
+                  label="Home"
+                  active={location.pathname === '/dashboard'}
+                />
+                <BottomTab
+                  to="/profile"
+                  icon={UserCircleIcon}
+                  activeIcon={UserCircleIconSolid}
+                  label="Profile"
+                  active={location.pathname === '/profile'}
+                />
+              </>
+            )}
 
-          <button
-            onClick={() => setActivePopover(activePopover === 'menu' ? null : 'menu')}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activePopover === 'menu' ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}
-          >
-            <Bars3Icon className="w-6 h-6" />
-            <span className="text-[10px] sm:text-xs font-black mt-1 uppercase tracking-tighter opacity-60">
-              Menu
-            </span>
-          </button>
+            <button
+              onClick={() => setActivePopover(activePopover === 'menu' ? null : 'menu')}
+              className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activePopover === 'menu' ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}
+            >
+              <Bars3Icon className="w-6 h-6" />
+              <span className="text-[10px] sm:text-xs font-black mt-1 uppercase tracking-tighter opacity-60">
+                Menu
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Compact Floating Popovers (Mobile Only) */}
       <AnimatePresence>
@@ -258,7 +260,6 @@ export default function Layout({ children }) {
 
                 )}
 
-
                 {activePopover === 'profile' && (
                   <>
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 mb-1">
@@ -298,38 +299,40 @@ export default function Layout({ children }) {
                   <span className="text-white font-bold text-lg sm:text-xl font-display">E</span>
                 </div>
                 <span className="font-display font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">
-                  EduCareer<span className="text-primary-600">.</span>
+                  EduCareerprep<span className="text-primary-600">.</span>
                 </span>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              {/* Student Links (Default) */}
-              {(!user || user.role === 'student') && (
-                <>
-                  <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Home</Link>
-                  <Link to="/jobs" className={`${navLinkClass} ${location.pathname === '/jobs' ? activeLinkClass : ''}`}>Jobs</Link>
-                  <Link to="/colleges" className={`${navLinkClass} ${location.pathname === '/colleges' ? activeLinkClass : ''}`}>Colleges</Link>
-                  <Link to="/interviews" className={`${navLinkClass} ${location.pathname.startsWith('/interviews') ? activeLinkClass : ''}`}>AI Interview</Link>
-                </>
-              )}
-              {/* Employer Links */}
-              {user?.role === 'employer' && (
-                <>
-                  <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Dashboard</Link>
-                  <Link to="/profile" className={`${navLinkClass} ${location.pathname === '/profile' ? activeLinkClass : ''}`}>Company Profile</Link>
-                </>
-              )}
+            {location.pathname !== '/' && (
+              <div className="hidden md:flex items-center space-x-1">
+                {/* Student Links (Default) */}
+                {(!user || user.role === 'student') && (
+                  <>
+                    <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Home</Link>
+                    <Link to="/jobs" className={`${navLinkClass} ${location.pathname === '/jobs' ? activeLinkClass : ''}`}>Jobs</Link>
+                    <Link to="/colleges" className={`${navLinkClass} ${location.pathname === '/colleges' ? activeLinkClass : ''}`}>Colleges</Link>
+                    <Link to="/interviews" className={`${navLinkClass} ${location.pathname.startsWith('/interviews') ? activeLinkClass : ''}`}>AI Interview</Link>
+                  </>
+                )}
+                {/* Employer Links */}
+                {user?.role === 'employer' && (
+                  <>
+                    <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Dashboard</Link>
+                    <Link to="/profile" className={`${navLinkClass} ${location.pathname === '/profile' ? activeLinkClass : ''}`}>Company Profile</Link>
+                  </>
+                )}
 
-              {/* Counselor Links */}
-              {user?.role === 'counselor' && (
-                <>
-                  <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Dashboard</Link>
-                  <Link to="/colleges" className={`${navLinkClass} ${location.pathname === '/colleges' ? activeLinkClass : ''}`}>My College</Link>
-                </>
-              )}
-            </div>
+                {/* Counselor Links */}
+                {user?.role === 'counselor' && (
+                  <>
+                    <Link to="/dashboard" className={`${navLinkClass} ${location.pathname === '/dashboard' ? activeLinkClass : ''}`}>Dashboard</Link>
+                    <Link to="/colleges" className={`${navLinkClass} ${location.pathname === '/colleges' ? activeLinkClass : ''}`}>My College</Link>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Right side */}
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -417,7 +420,7 @@ export default function Layout({ children }) {
           {/* Subtle Background Branding */}
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.02]">
             <span className="text-[20vw] font-black uppercase tracking-tighter whitespace-nowrap select-none">
-              EduCareerprep
+              EduCareerprep.
             </span>
           </div>
 

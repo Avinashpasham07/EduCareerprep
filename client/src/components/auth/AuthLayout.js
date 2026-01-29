@@ -51,7 +51,7 @@ export default function AuthLayout({ children, title, subtitle }) {
                         <Link to="/" className="inline-block mb-8 hover:opacity-80 transition-opacity">
                             <div className="flex items-center gap-2">
                                 <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">E</div>
-                                <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">EduCareer</span>
+                                <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">EduCareerprep.</span>
                             </div>
                         </Link>
                         <h2 className="text-3xl font-bold text-slate-900 dark:text-white font-display tracking-tight">{title}</h2>
@@ -61,7 +61,7 @@ export default function AuthLayout({ children, title, subtitle }) {
                     {children}
 
                     <p className="text-center text-xs text-slate-400 mt-12">
-                        &copy; 2026 EduCareer Platform. All rights reserved.
+                        &copy; 2026 EduCareerprep. Platform. All rights reserved.
                     </p>
                 </div>
             </div>
