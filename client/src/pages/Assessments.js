@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addCompletedAssessment } from '../store/slices/userActionsSlice';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   CommandLineIcon,
   CalculatorIcon,
@@ -16,9 +17,11 @@ import {
   GlobeAltIcon,
   BeakerIcon,
   CheckIcon,
-  XMarkIcon as XMarkIconSolid
+  XMarkIcon as XMarkIconSolid,
+  TrophyIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XCircleIcon, StarIcon } from '@heroicons/react/24/solid';
 import { assessmentsData } from '../data/assessmentsData';
 
 const CATEGORIES = ['All', 'Languages', 'Core CS', 'Aptitude', 'HR'];
@@ -47,6 +50,8 @@ export default function Assessments() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showResult, setShowResult] = useState(false);
+  const [resultData, setResultData] = useState(null);
 
   useEffect(() => {
     // Load from external data file
@@ -70,6 +75,8 @@ export default function Assessments() {
     setCurrentAssessment(assessment);
     setCurrentQuestion(0);
     setAnswers({});
+    setShowResult(false);
+    setResultData(null);
   };
 
   const handleAnswer = (questionId, index) => {
@@ -95,14 +102,25 @@ export default function Assessments() {
     });
     const percentage = Math.round((score / currentAssessment.questions.length) * 100);
 
-    alert(`Test Submitted!\nScore: ${score}/${currentAssessment.questions.length} (${percentage}%)`);
+    const result = {
+      score,
+      total: currentAssessment.questions.length,
+      percentage,
+      title: currentAssessment.title,
+      recommendations: percentage < 60
+        ? ["Review the fundamental concepts.", "Try smaller practice tests first.", "Consult tutorials on " + currentAssessment.category]
+        : ["Excellent performance!", "You have 100% mastery in these concepts.", "Ready to apply for jobs matching this skill!"]
+    };
+
+    setResultData(result);
+    setShowResult(true);
 
     dispatch(addCompletedAssessment({
       id: currentAssessment.id,
       title: currentAssessment.title,
       completedDate: new Date().toISOString().split('T')[0],
       score: percentage,
-      recommendations: percentage < 50 ? ["Review basics and retry."] : ["Ready for the next level!"]
+      recommendations: result.recommendations
     }));
 
     setCurrentAssessment(null);
@@ -333,6 +351,106 @@ export default function Assessments() {
             <p className="text-slate-500">Try selecting a different category.</p>
           </div>
         )}
+
+        {/* Result Modal */}
+        <AnimatePresence>
+          {showResult && resultData && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowResult(false)}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800"
+              >
+                {/* Modal Header/Image */}
+                <div className={`p-8 text-center bg-gradient-to-br ${resultData.percentage >= 60 ? 'from-emerald-500 to-teal-600' : 'from-amber-500 to-orange-600'} text-white relative`}>
+                  <div className="absolute top-4 right-4">
+                    <button onClick={() => setShowResult(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                      <XMarkIconSolid className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="inline-flex p-4 bg-white/20 rounded-3xl backdrop-blur-md mb-4">
+                    {resultData.percentage >= 60 ? (
+                      <TrophyIcon className="w-12 h-12 text-yellow-300" />
+                    ) : (
+                      <ArrowPathIcon className="w-12 h-12 text-white" /> 
+                    )}
+                  </div>
+
+                  <h3 className="text-3xl font-black mb-1">
+                    {resultData.percentage >= 60 ? 'Assessment Passed!' : 'Assessment Finished'}
+                  </h3>
+                  <p className="opacity-80 font-bold uppercase tracking-widest text-xs">{resultData.title}</p>
+                </div>
+
+                <div className="p-8">
+                  {/* Score Visualization */}
+                  <div className="flex justify-around items-center mb-8 gap-4">
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Score</p>
+                      <p className="text-4xl font-black text-slate-900 dark:text-white">{resultData.score}/{resultData.total}</p>
+                    </div>
+                    <div className="h-12 w-px bg-slate-100 dark:bg-slate-800"></div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Percentage</p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-4xl font-black ${resultData.percentage >= 60 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                          {resultData.percentage}%
+                        </p>
+                        {resultData.percentage >= 80 && <StarIcon className="w-6 h-6 text-yellow-400 animate-pulse" />}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recommendations */}
+                  <div className="space-y-4 mb-8">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <CheckBadgeIcon className="w-5 h-5 text-primary-600" />
+                      Performance Feedback
+                    </h4>
+                    <div className="space-y-2">
+                      {resultData.recommendations.map((rec, i) => (
+                        <div key={i} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400 font-medium">
+                          <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
+                          {rec}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowResult(false)}
+                      className="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-slate-900/10"
+                    >
+                      Close Report
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowResult(false);
+                        const original = assessments.find(a => a.title === resultData.title);
+                        if (original) startAssessment(original);
+                      }}
+                      className="p-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                      title="Retake Assessment"
+                    >
+                      <ArrowPathIcon className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>

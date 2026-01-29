@@ -19,7 +19,6 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 
-import Footer from '../components/common/Footer';
 
 // --- Utility Components ---
 
@@ -81,7 +80,6 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
           <Badge>The #1 AI-Powered Career Platform</Badge>
-
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -435,8 +433,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- FOOTER --- */}
-      <Footer />
     </div >
   );
 }

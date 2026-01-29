@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 import { useEffect, useState } from 'react';
@@ -8,22 +8,27 @@ import {
   MoonIcon,
   UserCircleIcon,
   Bars3Icon,
-  XMarkIcon,
   ArrowRightOnRectangleIcon,
   BriefcaseIcon,
   BuildingLibraryIcon,
   AcademicCapIcon,
-  BellIcon
+  BellIcon,
+  HomeIcon,
+  CommandLineIcon,
+  ChatBubbleBottomCenterTextIcon
 } from '@heroicons/react/24/outline';
+import { HomeIcon as HomeIconSolid, BriefcaseIcon as BriefcaseIconSolid, BuildingLibraryIcon as BuildingLibraryIconSolid, AcademicCapIcon as AcademicCapIconSolid, UserCircleIcon as UserCircleIconSolid } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
+import Footer from './common/Footer';
 
 export default function Layout({ children }) {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useSelector((s) => s.auth);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activePopover, setActivePopover] = useState(null); // 'menu' | 'profile' | null
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
@@ -37,6 +42,11 @@ export default function Layout({ children }) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Auto-close popovers on route change
+  useEffect(() => {
+    setActivePopover(null);
+  }, [location.pathname]);
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
@@ -55,21 +65,224 @@ export default function Layout({ children }) {
     }
   };
 
-  const MobileNavLink = ({ to, children, onClick, active }) => (
+
+  const BottomTab = ({ to, icon: Icon, activeIcon: ActiveIcon, label, active }) => (
     <Link
       to={to}
-      onClick={onClick}
-      className={`flex items-center p-4 rounded-xl font-bold transition-all duration-200 ${active
-        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white'
+      className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${active ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'
         }`}
     >
-      {children}
+      <div className="relative">
+        {active ? <ActiveIcon className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
+        {active && (
+          <motion.div
+            layoutId="tab-indicator"
+            className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+          />
+        )}
+      </div>
+      <span className={`text-[10px] sm:text-[11px] font-black mt-1.5 uppercase tracking-widest ${active ? 'text-emerald-700 dark:text-emerald-400 opacity-100' : 'text-slate-500 dark:text-slate-500 opacity-80'}`}>
+        {label}
+      </span>
     </Link>
   );
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans">
+      {/* Bottom Navigation (Mobile Only) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
+        <div className="glass-panel border border-white/20 dark:border-slate-800/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] rounded-3xl h-20 flex items-center justify-around relative overflow-hidden">
+          {/* Animated Background Highlight */}
+          <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none"></div>
+
+          {/* Role-based Navigation Content */}
+          {(!user || user.role === 'student') && (
+            <>
+              <BottomTab
+                to="/dashboard"
+                icon={HomeIcon}
+                activeIcon={HomeIconSolid}
+                label="Home"
+                active={location.pathname === '/dashboard'}
+              />
+              <BottomTab
+                to="/jobs"
+                icon={BriefcaseIcon}
+                activeIcon={BriefcaseIconSolid}
+                label="Jobs"
+                active={location.pathname === '/jobs'}
+              />
+              <BottomTab
+                to="/colleges"
+                icon={BuildingLibraryIcon}
+                activeIcon={BuildingLibraryIconSolid}
+                label="Colleges"
+                active={location.pathname === '/colleges'}
+              />
+              <BottomTab
+                to="/interviews"
+                icon={AcademicCapIcon}
+                activeIcon={AcademicCapIconSolid}
+                label="Interview"
+                active={location.pathname.startsWith('/interviews')}
+              />
+            </>
+          )}
+
+          {user?.role === 'employer' && (
+            <>
+              <BottomTab
+                to="/dashboard"
+                icon={HomeIcon}
+                activeIcon={HomeIconSolid}
+                label="Home"
+                active={location.pathname === '/dashboard'}
+              />
+              <BottomTab
+                to="/profile"
+                icon={UserCircleIcon}
+                activeIcon={UserCircleIconSolid}
+                label="Profile"
+                active={location.pathname === '/profile'}
+              />
+            </>
+          )}
+
+          {user?.role === 'counselor' && (
+            <>
+              <BottomTab
+                to="/dashboard"
+                icon={HomeIcon}
+                activeIcon={HomeIconSolid}
+                label="Home"
+                active={location.pathname === '/dashboard'}
+              />
+              <BottomTab
+                to="/profile"
+                icon={UserCircleIcon}
+                activeIcon={UserCircleIconSolid}
+                label="Profile"
+                active={location.pathname === '/profile'}
+              />
+            </>
+          )}
+
+          <button
+            onClick={() => setActivePopover(activePopover === 'menu' ? null : 'menu')}
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative ${activePopover === 'menu' ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'}`}
+          >
+            <Bars3Icon className="w-6 h-6" />
+            <span className="text-[10px] sm:text-xs font-black mt-1 uppercase tracking-tighter opacity-60">
+              Menu
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Compact Floating Popovers (Mobile Only) */}
+      <AnimatePresence>
+        {activePopover && (
+          <>
+            {/* Backdrop for closing */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActivePopover(null)}
+              className="fixed inset-0 z-[60] bg-transparent"
+            />
+
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+                y: activePopover === 'menu' ? 20 : -20,
+                originY: activePopover === 'menu' ? 'bottom' : 'top',
+                originX: 'right'
+              }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{
+                opacity: 0,
+                scale: 0.9,
+                y: activePopover === 'menu' ? 20 : -20
+              }}
+              className={`fixed z-[70] w-64 bg-white dark:bg-slate-950 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-2xl rounded-2xl p-2 right-4 ${activePopover === 'menu' ? 'bottom-28' : 'top-20'
+                }`}
+            >
+              <div className="flex flex-col space-y-1">
+                {activePopover === 'menu' && (
+                  <>
+                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-4 py-2 border-b border-slate-100 dark:border-white/5 mb-1">Navigation Menu</p>
+
+                    {/* Role Specific Actions in Menu */}
+                    {user?.role === 'employer' && (
+                      <>
+                        <Link to="/applications" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <BriefcaseIcon className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">Candidates</span>
+                        </Link>
+                        <Link to="/jobs" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <AcademicCapIcon className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">Post Job</span>
+                        </Link>
+                      </>
+                    )}
+
+                    {user?.role === 'counselor' && (
+                      <>
+                        <Link to="/colleges" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <BuildingLibraryIcon className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">My College</span>
+                        </Link>
+                        <Link to="/notifications" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <BellIcon className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">Alerts & Notices</span>
+                        </Link>
+                      </>
+                    )}
+
+                    <div className="h-[1px] bg-slate-100 dark:bg-white/5 my-1 mx-2"></div>
+                    {user?.role === 'student' && (
+                      <>
+                        <Link to="/roadmap" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <CommandLineIcon className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">Career Roadmap</span>
+                        </Link>
+                        <Link to="/playground" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                          <ChatBubbleBottomCenterTextIcon className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+                          <span className="font-bold text-sm">Code Arena</span>
+                        </Link>
+                      </>
+                    )}
+                  </>
+
+                )}
+
+
+                {activePopover === 'profile' && (
+                  <>
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 mb-1">
+                      <p className="font-bold text-slate-900 dark:text-white text-sm">{user?.name}</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{user?.role}</p>
+                    </div>
+                    <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
+                      <UserCircleIcon className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                      <span className="font-bold text-sm">My Profile</span>
+                    </Link>
+                    <button
+                      onClick={() => dispatch(logout())}
+                      className="flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors w-full text-left"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                      <span className="font-bold text-sm">Logout</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
       <nav
         className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled
           ? 'glass-panel border-b border-slate-200/50 dark:border-slate-800/50 py-2'
@@ -124,17 +337,19 @@ export default function Layout({ children }) {
               {user && (
                 <Link to="/notifications" className="relative group">
                   <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                    <BellIcon className="w-5 h-5 sm:w-6 h-6" />
-                    {/* Unread indicator dot (mock) */}
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+                    <div className="flex items-center gap-3">
+                      {/* Unread indicator dot (mock) */}
+                      <BellIcon className="w-5 h-5 sm:w-6 h-6" />
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+                    </div>
                   </button>
                 </Link>
               )}
 
-              {/* Theme Toggle (Desktop Only - accessible via mobile menu on mobile) */}
+              {/* Theme Toggle */}
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="hidden sm:flex w-10 h-10 rounded-xl items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                className="flex w-10 h-10 rounded-xl items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               >
                 {theme === 'dark' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
               </button>
@@ -142,7 +357,15 @@ export default function Layout({ children }) {
               {/* User Menu */}
               {user ? (
                 <div className="flex items-center space-x-2 sm:space-x-4 pl-2 sm:pl-4 border-l border-slate-200 dark:border-slate-800">
-                  <Link to="/profile">
+                  <div
+                    onClick={() => {
+                      if (window.innerWidth < 768) {
+                        setActivePopover(activePopover === 'profile' ? null : 'profile');
+                      } else {
+                        navigate('/profile');
+                      }
+                    }}
+                  >
                     <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group">
                       <div className="text-right hidden sm:block">
                         <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{user.name}</p>
@@ -156,7 +379,7 @@ export default function Layout({ children }) {
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -181,157 +404,36 @@ export default function Layout({ children }) {
                   </Link>
                 </div>
               )}
-
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Bars3Icon className="w-6 h-6" />
-              </button>
             </div>
           </div>
-
-          {/* Mobile Navigation Overlay */}
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <>
-                {/* Backdrop */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] md:hidden"
-                />
-
-                {/* Menu Panel */}
-                <motion.div
-                  initial={{ x: '100%' }}
-                  animate={{ x: 0 }}
-                  exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="fixed right-0 top-0 h-full w-[80%] max-w-sm bg-white dark:bg-slate-950 z-[70] shadow-2xl md:hidden flex flex-col"
-                >
-                  <div className="p-6 flex flex-col h-full">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
-                      <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
-                        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">E</span>
-                        </div>
-                        <span className="font-bold text-lg text-slate-900 dark:text-white">EduCareer</span>
-                      </Link>
-                      <button
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500"
-                      >
-                        <XMarkIcon className="w-6 h-6" />
-                      </button>
-                    </div>
-
-                    {/* User Profile Info (Mobile) */}
-                    {user && (
-                      <div className="mb-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-200 dark:border-emerald-800 overflow-hidden">
-                            {user.profile?.avatar ? (
-                              <img src={user.profile.avatar} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              getRoleIcon(user.role)
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900 dark:text-white leading-tight">{user.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Links */}
-                    <div className="flex-1 overflow-y-auto space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Navigation</p>
-
-                      {(!user || user.role === 'student') && (
-                        <>
-                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Home</MobileNavLink>
-                          <MobileNavLink to="/jobs" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/jobs'}>Jobs</MobileNavLink>
-                          <MobileNavLink to="/colleges" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/colleges'}>Colleges</MobileNavLink>
-                          <MobileNavLink to="/interviews" onClick={() => setMobileMenuOpen(false)} active={location.pathname.startsWith('/interviews')}>AI Interview</MobileNavLink>
-                          <MobileNavLink to="/roadmap" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/roadmap'}>Career Roadmap</MobileNavLink>
-                          <MobileNavLink to="/playground" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/playground'}>Code Arena</MobileNavLink>
-                        </>
-                      )}
-
-                      {user?.role === 'employer' && (
-                        <>
-                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Dashboard</MobileNavLink>
-                          <MobileNavLink to="/jobs" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/jobs'}>Manage Jobs</MobileNavLink>
-                          <MobileNavLink to="/profile" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/profile'}>Company Profile</MobileNavLink>
-                        </>
-                      )}
-
-                      {user?.role === 'counselor' && (
-                        <>
-                          <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/dashboard'}>Dashboard</MobileNavLink>
-                          <MobileNavLink to="/colleges" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/colleges'}>My Institutions</MobileNavLink>
-                        </>
-                      )}
-
-                      <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Account</p>
-                        <MobileNavLink to="/profile" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/profile'}>My Profile</MobileNavLink>
-                        <MobileNavLink to="/notifications" onClick={() => setMobileMenuOpen(false)} active={location.pathname === '/notifications'}>Notifications</MobileNavLink>
-                      </div>
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                      <button
-                        onClick={() => {
-                          setTheme(theme === 'dark' ? 'light' : 'dark');
-                          setMobileMenuOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          {theme === 'dark' ? <MoonIcon className="w-5 h-5 text-indigo-500" /> : <SunIcon className="w-5 h-5 text-amber-500" />}
-                          <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-                        </div>
-                        <div className={`w-10 h-5 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-primary-600' : 'bg-slate-300'}`}>
-                          <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${theme === 'dark' ? 'left-6' : 'left-1'}`} />
-                        </div>
-                      </button>
-
-                      {user ? (
-                        <button
-                          onClick={() => {
-                            dispatch(logout());
-                            setMobileMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-600 font-bold text-sm"
-                        >
-                          <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                          <span>Logout</span>
-                        </button>
-                      ) : (
-                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                          <button className="w-full py-4 bg-primary-600 text-white rounded-xl font-bold shadow-lg shadow-primary-500/20">
-                            Sign In
-                          </button>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
         </div>
       </nav>
 
-      <main className="pt-24 min-h-screen">
-        {children}
+      <main className="pt-24 pb-24 md:pb-0 min-h-screen flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        <div className="mt-48 relative overflow-hidden py-24 flex flex-col items-center justify-center">
+          {/* Subtle Background Branding */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.02]">
+            <span className="text-[20vw] font-black uppercase tracking-tighter whitespace-nowrap select-none">
+              EduCareerprep
+            </span>
+          </div>
+
+          <div className="relative z-10 text-center">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-200 dark:text-slate-800 uppercase tracking-tighter leading-none mb-4">
+              EduCareer<span className="text-primary-500/20">prep.</span>
+            </h2>
+            <p className="text-slate-300 dark:text-slate-700 font-bold uppercase tracking-widest text-sm">
+              Level up your professional journey
+            </p>
+          </div>
+
+          <div className="mt-20 w-full">
+            <Footer />
+          </div>
+        </div>
       </main>
     </div>
   );

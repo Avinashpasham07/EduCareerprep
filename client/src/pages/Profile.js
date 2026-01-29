@@ -7,6 +7,7 @@ import ProfileHero from '../components/profile/ProfileHero';
 import { userApi } from '../services/api';
 import StudentProfileEditor from '../components/dashboard/StudentProfileEditor';
 import CollegeProfileEditor from '../components/dashboard/CollegeProfileEditor';
+import CompanyProfileEditor from '../components/dashboard/CompanyProfileEditor';
 
 import AIResumeAnalyzer from '../components/dashboard/AIResumeAnalyzer';
 import KanbanBoard from '../components/dashboard/KanbanBoard';
@@ -20,7 +21,11 @@ import {
   UserCircleIcon,
   BuildingOfficeIcon,
   PencilSquareIcon,
-  SparklesIcon
+  SparklesIcon,
+  MapPinIcon,
+  AcademicCapIcon,
+  DocumentIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 
 const ICONS = {
@@ -172,67 +177,78 @@ export default function Profile() {
                   </div>
                 )}
 
-                <Card className={`p-0 h-fit border-0 shadow-2xl shadow-green-500/10 bg-white dark:bg-slate-900 relative overflow-hidden group ${isViewingAsRecruiter ? 'lg:col-span-3 lg:max-w-3xl mx-auto' : 'lg:row-span-2'}`}>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-all group-hover:scale-150 duration-700"></div>
+                <Card className={`p-0 h-fit border-0 shadow-2xl shadow-emerald-500/5 bg-white dark:bg-slate-900 relative overflow-hidden group ${isViewingAsRecruiter ? 'lg:col-span-3 lg:max-w-3xl mx-auto' : 'lg:row-span-2 shadow-xl shadow-slate-200/50 dark:shadow-none'}`}>
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-full blur-3xl -mr-20 -mt-20"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-violet-500/5 to-transparent rounded-full blur-3xl -ml-10 -mb-10"></div>
 
-                  <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-white/5 backdrop-blur-sm">
-                    <h3 className="font-extrabold text-lg text-slate-900 dark:text-white font-display flex items-center gap-3">
-                      <span className="p-0.5 bg-green-100 dark:bg-green-500/20 rounded-lg text-green-600 dark:text-green-300 overflow-hidden w-10 h-10 flex items-center justify-center">
-                        {user.profile?.avatar ? (
-                          <img src={user.profile.avatar} alt="" className="w-full h-full object-cover rounded-md" />
-                        ) : (
-                          <UserCircleIcon className="w-6 h-6" />
-                        )}
-                      </span>
-                      Identity Card
+                  <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-20">
+                    <h3 className="font-black text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 flex items-center gap-3">
+                      <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                      User Identity
                     </h3>
                     {isOwnProfile && (
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="text-xs font-bold bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-500/20 px-4 py-2 rounded-xl transition-all border border-green-100 dark:border-green-500/20 flex items-center gap-2"
+                        className="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl transition-all border border-emerald-100 dark:border-emerald-500/20 shadow-sm"
+                        title="Edit Profile"
                       >
-                        <PencilSquareIcon className="w-3.5 h-3.5" />
-                        Edit Details
+                        <PencilSquareIcon className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
-                  <div className="p-8 space-y-6 relative z-10">
-                    <div className="grid grid-cols-1 gap-6">
-                      {[
-                        { label: 'Full Name', val: user?.name, full: true },
-                        { label: 'Primary Email', val: user?.email, full: true },
-                        { label: 'Current Location', val: user?.profile?.location || 'Not set' },
-                        { label: 'University / College', val: user?.profile?.collegeId?.name || user?.profile?.university || 'Not set' },
-                        { label: 'Degree / Major', val: user?.profile?.education || 'Not set' },
-                        { label: 'Graduation Year', val: user?.profile?.grade || user?.profile?.graduationYear || 'Not set' },
-                        { label: 'Portfolio / Website', val: user?.profile?.portfolioLink ? <a href={user.profile.portfolioLink} target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline">View Public Portfolio</a> : 'Not set' },
-                        { label: 'Resume Link', val: user?.profile?.resumeLink ? <a href={user.profile.resumeLink} target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline">View Public Resume</a> : 'Not set' },
-                      ].map((item, i) => (
-                        <div key={i} className={`${item.full ? 'col-span-1' : ''}`}>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">{item.label}</label>
-                          <p className="text-base font-semibold text-slate-800 dark:text-slate-200">{item.val}</p>
+                  <div className="p-8 space-y-8 relative z-10">
+                    <div className="grid grid-cols-1 gap-8">
+                      {(user?.role === 'employer' ? [
+                        { label: 'Company Name', val: user?.profile?.recruiterProfile?.companyName, full: true, icon: <BuildingOfficeIcon className="w-4 h-4" /> },
+                        { label: 'Primary Email', val: user?.email, full: true, icon: <ChatBubbleLeftRightIcon className="w-4 h-4" /> },
+                        { label: 'Headquarters', val: user?.profile?.location || 'Not set', icon: <MapPinIcon className="w-4 h-4" /> },
+                        { label: 'Industry', val: user?.profile?.recruiterProfile?.industry || 'Not set', icon: <BriefcaseIcon className="w-4 h-4" /> },
+                        { label: 'Website', val: user?.profile?.recruiterProfile?.website || 'Not set', icon: <GlobeAltIcon className="w-4 h-4" /> },
+                        { label: 'Company Size', val: user?.profile?.recruiterProfile?.size || 'Not set', icon: <UserCircleIcon className="w-4 h-4" /> },
+                      ] : [
+                        { label: 'Full Name', val: user?.name, full: true, icon: <UserCircleIcon className="w-4 h-4" /> },
+                        { label: 'Primary Email', val: user?.email, full: true, icon: <ChatBubbleLeftRightIcon className="w-4 h-4" /> },
+                        { label: 'Location', val: user?.profile?.location || 'Not set', icon: <MapPinIcon className="w-4 h-4" /> },
+                        { label: 'Institution', val: user?.profile?.collegeId?.name || user?.profile?.university || 'Not set', icon: <BuildingLibraryIcon className="w-4 h-4" /> },
+                        { label: 'Education', val: user?.profile?.education || 'Not set', icon: <AcademicCapIcon className="w-4 h-4" /> },
+                        { label: 'Graduation', val: user?.profile?.grade || user?.profile?.graduationYear || 'Not set', icon: <DocumentIcon className="w-4 h-4" /> },
+                      ]).map((item, i) => (
+                        <div key={i} className="group/item">
+                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2 group-hover/item:text-emerald-500 transition-colors">
+                            <span className="opacity-50">{item.icon}</span>
+                            {item.label}
+                          </label>
+                          <p className="text-base font-bold text-slate-800 dark:text-slate-200 bg-slate-50/50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5 group-hover/item:border-emerald-500/20 transition-all">
+                            {item.val}
+                          </p>
                         </div>
                       ))}
 
-                      <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">Professional Bio</label>
-                        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                          {user?.profile?.bio || 'Write a short bio to introduce yourself to recruiters...'}
-                        </p>
+                      <div className="pt-2">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">
+                          {user?.role === 'employer' ? 'Company Mission' : 'Professional Bio'}
+                        </label>
+                        <div className="p-4 bg-emerald-50/30 dark:bg-emerald-500/5 border border-emerald-100/50 dark:border-emerald-500/10 rounded-2xl">
+                          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 italic">
+                            "{user?.role === 'employer' ? (user?.profile?.recruiterProfile?.description || 'Build your employer brand by adding a mission statement...') : (user?.profile?.bio || 'Write a short bio to introduce yourself to recruiters...')}"
+                          </p>
+                        </div>
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">Skills & Expertise</label>
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">
+                          {user?.role === 'employer' ? 'Perks & Benefits' : 'Skills & Expertise'}
+                        </label>
                         <div className="flex flex-wrap gap-2">
-                          {user?.profile?.skills?.length > 0 ? (
-                            user.profile.skills.map((skill, i) => (
-                              <span key={i} className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">
-                                {skill}
+                          {(user?.role === 'employer' ? user?.profile?.recruiterProfile?.benefits : user?.profile?.skills)?.length > 0 ? (
+                            (user?.role === 'employer' ? user.profile.recruiterProfile.benefits : user.profile.skills).map((item, i) => (
+                              <span key={i} className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700 shadow-sm hover:border-emerald-500/50 transition-colors">
+                                {item}
                               </span>
                             ))
                           ) : (
-                            <span className="text-xs text-slate-400 italic">No skills added yet</span>
+                            <span className="text-xs text-slate-400 italic font-medium">No details added yet</span>
                           )}
                         </div>
                       </div>
@@ -284,40 +300,6 @@ export default function Profile() {
                         <BuildingOfficeIcon className="w-5 h-5 text-slate-400" />
                         Company Profile
                       </h3>
-                      <button className="text-sm text-emerald-600 font-bold hover:underline">Edit</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {[
-                        { label: 'Company Name', val: user?.name || 'Tech Solutions Inc.' },
-                        { label: 'Industry', val: 'Information Technology' },
-                        { label: 'Location', val: user?.location || 'San Francisco, CA' },
-                        { label: 'Size', val: '50-100 Employees' },
-                      ].map((item, i) => (
-                        <div key={i}>
-                          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{item.label}</label>
-                          <p className="text-slate-700 dark:text-slate-300 font-medium truncate">{item.val}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                </div>
-              </>
-            )}
-
-            {/* --- COUNSELOR VIEW --- */}
-            {isCounselor && (
-              <>
-                <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <StatItem label="Students" value={dashboardStats?.totalStudents || 0} />
-                  <StatItem label="Placed" value={dashboardStats?.placedStudents || 0} />
-                  <StatItem label="Partners" value={dashboardStats?.activeCompanies || 0} />
-                  <StatItem label="Pending" value={0} />
-                </div>
-
-                <div className="lg:col-span-2">
-                  <Card className="p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white font-display">Institution Profile</h3>
                       <button
                         onClick={() => setIsEditing(true)}
                         className="text-sm text-emerald-600 font-bold hover:underline"
@@ -327,10 +309,10 @@ export default function Profile() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {[
-                        { label: 'College Name', val: user?.name || 'Institute of Technology' },
-                        { label: 'Code', val: 'INT-2024' },
-                        { label: 'Email', val: user?.email },
-                        { label: 'Phone', val: user?.phone || '+91 98765 43210' },
+                        { label: 'Company Name', val: user?.profile?.recruiterProfile?.companyName || user?.name || 'Not set' },
+                        { label: 'Industry', val: user?.profile?.recruiterProfile?.industry || 'Not set' },
+                        { label: 'Location', val: user?.profile?.location || 'Not set' },
+                        { label: 'Size', val: user?.profile?.recruiterProfile?.size || 'Not set' },
                       ].map((item, i) => (
                         <div key={i}>
                           <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{item.label}</label>
@@ -341,8 +323,50 @@ export default function Profile() {
                   </Card>
                 </div>
               </>
-            )}
-          </div>
+            )
+            }
+
+            {/* --- COUNSELOR VIEW --- */}
+            {
+              isCounselor && (
+                <>
+                  <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <StatItem label="Students" value={dashboardStats?.totalStudents || 0} />
+                    <StatItem label="Placed" value={dashboardStats?.placedStudents || 0} />
+                    <StatItem label="Partners" value={dashboardStats?.activeCompanies || 0} />
+                    <StatItem label="Pending" value={0} />
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    <Card className="p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white font-display">Institution Profile</h3>
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="text-sm text-emerald-600 font-bold hover:underline"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[
+                          { label: 'College Name', val: user?.name || 'Institute of Technology' },
+                          { label: 'Code', val: 'INT-2024' },
+                          { label: 'Email', val: user?.email },
+                          { label: 'Phone', val: user?.phone || '+91 98765 43210' },
+                        ].map((item, i) => (
+                          <div key={i}>
+                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{item.label}</label>
+                            <p className="text-slate-700 dark:text-slate-300 font-medium truncate">{item.val}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+                </>
+              )
+            }
+          </div >
         );
 
       case 'ai-analyzer':
@@ -446,7 +470,7 @@ export default function Profile() {
         {/* --- Edit Profile Modal --- */}
         <AnimatePresence>
           {isEditing && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-24 bg-black/60 backdrop-blur-sm overflow-y-auto">
+            <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-24 bg-black/60 backdrop-blur-sm overflow-y-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -463,6 +487,8 @@ export default function Profile() {
               >
                 {user?.role === 'counselor' ? (
                   <CollegeProfileEditor onCancel={() => setIsEditing(false)} />
+                ) : user?.role === 'employer' ? (
+                  <CompanyProfileEditor onCancel={() => setIsEditing(false)} />
                 ) : (
                   <StudentProfileEditor onCancel={() => setIsEditing(false)} />
                 )}
@@ -487,15 +513,15 @@ function StatItem({ label, value, icon, color = 'slate' }) {
   const activeStyle = colorStyles[color] || colorStyles.slate;
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center gap-2 hover:translate-y-[-2px] transition-transform duration-300">
-      <div className={`p-3 rounded-xl ${activeStyle} bg-opacity-50 dark:bg-opacity-10`}>
-        {icon || <ChartBarIcon className="w-5 h-5" />}
+    <div className="p-3 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center md:items-center justify-center md:justify-start gap-3 hover:translate-y-[-2px] transition-transform duration-300">
+      <div className={`p-2.5 md:p-3 rounded-xl ${activeStyle} bg-opacity-50 dark:bg-opacity-10 shrink-0`}>
+        {icon || <ChartBarIcon className="w-4 h-4 md:w-5 md:h-5" />}
       </div>
-      <div className="text-center">
-        <div className="text-2xl font-black text-slate-900 dark:text-white leading-none mb-1">
+      <div className="text-center md:text-left">
+        <div className="text-lg md:text-2xl font-black text-slate-900 dark:text-white leading-none mb-0.5">
           {value}
         </div>
-        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
+        <div className="text-[9px] md:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{label}</div>
       </div>
     </div>
   );

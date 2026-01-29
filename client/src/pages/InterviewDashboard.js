@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
     MicrophoneIcon,
     PlayCircleIcon,
@@ -18,9 +19,9 @@ import {
     PaintBrushIcon,
     CloudIcon
 } from '@heroicons/react/24/outline';
-import Footer from '../components/common/Footer';
 
 export default function InterviewDashboard() {
+    const { user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const [stats, setStats] = useState({ avgScore: 0, practiceTime: "0h 0m" });
@@ -98,7 +99,9 @@ export default function InterviewDashboard() {
 
                 {/* 1. Dashboard Header & Stats */}
                 <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">Welcome back, Avinash</h1>
+                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">
+                        Welcome back, {user?.name?.split(' ')[0] || 'Scholar'}
+                    </h1>
                     <p className="text-slate-500 mb-8">Ready to crush your next interview?</p>
 
                     {/* Stats Grid */}
@@ -160,8 +163,8 @@ export default function InterviewDashboard() {
                         </div>
 
                         {/* CONFIGURATION PANEL - Slides Down */}
-                        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isConfiguring ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="p-8 md:p-10 bg-white">
+                        <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isConfiguring ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="p-6 md:p-10 bg-white">
 
                                 <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                                     <AdjustmentsHorizontalIcon className="w-5 h-5 text-green-600" />
@@ -169,7 +172,7 @@ export default function InterviewDashboard() {
                                 </h3>
 
                                 {/* Grid Selection for Roles */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
                                     {roles.map((role) => (
                                         <button
                                             key={role.id}
@@ -217,7 +220,7 @@ export default function InterviewDashboard() {
                                     <button
                                         onClick={handleStartInterview}
                                         disabled={!config.role}
-                                        className="flex-1 bg-slate-900 text-white h-12 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all flex items-center justify-center gap-2"
+                                        className="flex-1 bg-slate-900 text-white h-12 rounded-xl p-3 font-bold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all flex items-center justify-center gap-2"
                                     >
                                         <span>Enter Interview Room</span>
                                         <ArrowRightIcon className="w-4 h-4" />
@@ -292,7 +295,7 @@ export default function InterviewDashboard() {
                 </div>
 
             </div>
-            <Footer />
+
         </div>
     );
 }

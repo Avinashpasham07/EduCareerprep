@@ -2,9 +2,15 @@ const mongoose = require('mongoose');
 
 const ApplicationSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  status: { type: String, enum: ['applied', 'interview', 'offer', 'rejected'], default: 'applied' },
+  status: { type: String, enum: ['applied', 'shortlisted', 'interview', 'offer', 'hired', 'rejected'], default: 'applied' },
   resumeUrl: String,
   coverLetter: String,
+  interviewDetails: {
+    roomId: String, // Keep for backward compatibility or remove later
+    meetingLink: String,
+    date: Date,
+    status: { type: String, default: 'scheduled' }
+  }
 }, { timestamps: true });
 
 const JobSchema = new mongoose.Schema({

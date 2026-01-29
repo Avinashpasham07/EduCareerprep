@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userApi } from '../../services/api';
-import { TrophyIcon, FireIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, MapPinIcon } from '@heroicons/react/24/solid';
 
 export default function Leaderboard() {
     const [leaders, setLeaders] = useState([]);
@@ -46,7 +46,9 @@ export default function Leaderboard() {
                             <h4 className="font-bold text-slate-900 dark:text-white truncate">{student.name}</h4>
                             <div className="flex items-center gap-2 text-xs text-slate-500">
                                 <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10">Lvl {student.gamification?.level || 1}</span>
-                                <span className="truncate">Student</span>
+                                <span className="flex items-center gap-1 truncate">
+                                    <MapPinIcon className="w-3 h-3 opacity-70" /> {student.profile?.location || 'India'}
+                                </span>
                             </div>
                         </div>
 

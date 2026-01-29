@@ -63,6 +63,11 @@ const UserSchema = new mongoose.Schema({
     recruiterProfile: {
       companyName: String,
       industry: String,
+      description: String,
+      website: String,
+      size: String,
+      benefits: [String],
+      logo: String
     }
   },
   savedColleges: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -72,7 +77,7 @@ const UserSchema = new mongoose.Schema({
     job: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
     status: {
       type: String,
-      enum: ['applied', 'screening', 'interview', 'offer', 'rejected'],
+      enum: ['applied', 'screening', 'shortlisted', 'interview', 'offer', 'hired', 'rejected'],
       default: 'applied'
     },
     notes: String,
@@ -115,6 +120,24 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.comparePassword = async function comparePassword(password) {
   return bcrypt.compare(password, this.passwordHash);
+};
+
+UserSchema.methods.awardXP = async function awardXP(amount) {
+  if (!this.gamification) {
+    this.gamification = { xp: 0, level: 1, badges: [] };
+  }
+
+  this.gamification.xp += amount;
+
+  // Level Calculation: Level = Floor(XP / 100) + 1
+  const newLevel = Math.floor(this.gamification.xp / 100) + 1;
+
+  if (newLevel > this.gamification.level) {
+    this.gamification.level = newLevel;
+    // Potentially trigger a level-up notification here
+  }
+
+  return this.save();
 };
 
 UserSchema.statics.hashPassword = async function hashPassword(password) {

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api from '../../services/api';
 import CollegeProfileEditor from './CollegeProfileEditor';
-import Footer from '../common/Footer';
 import JobDetailModal from './JobDetailModal';
 import BroadcastModal from './BroadcastModal';
 // Assuming you have these icons or similar installed
@@ -358,7 +357,7 @@ export default function CollegeDashboard() {
                     </main>
                 </div>
             </div>
-            <Footer />
+
             <BroadcastModal
                 isOpen={isBroadcastOpen}
                 onClose={() => setIsBroadcastOpen(false)}
@@ -410,7 +409,7 @@ function HiringPartnersTab({ user, recruiters, targetedJobs, setTargetedJobs, lo
                             <div key={job._id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-500/20 shadow-sm hover:shadow-md transition-all group">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${job.hiringType === 'on-campus' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                                        {job.hiringType === 'on-campus' ? '🏫 On-Campus Drive' : '🎓 Off-Campus/Preferred'}
+                                        {job.hiringType === 'on-campus' ? <><BuildingLibraryIcon className="w-3 h-3 inline-block mr-1 mb-0.5" /> On-Campus Drive</> : <><AcademicCapIcon className="w-3 h-3 inline-block mr-1 mb-0.5" /> Off-Campus/Preferred</>}
                                     </div>
                                     <span className="text-xs font-bold text-slate-400">{job.vacancies || 0} Openings</span>
                                 </div>

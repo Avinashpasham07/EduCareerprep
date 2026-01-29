@@ -84,11 +84,11 @@ export default function StudentProfileEditor({ onCancel }) {
             // Force fetch fresh data to ensure consistency
             dispatch(fetchCurrentUser());
 
-            alert('Profile updated successfully! 🎓');
+            alert('Profile updated successfully!');
             if (onCancel) onCancel();
         } catch (err) {
             console.error(err);
-            const msg = err.response?.data?.message || 'Failed to update profile ❌';
+            const msg = err.response?.data?.message || 'Failed to update profile';
             alert(msg);
         }
     };

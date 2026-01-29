@@ -17,75 +17,148 @@ export default function Roadmap() {
         // Mock AI Generation - in real app, call Gemini API
         setTimeout(() => {
             const mockRoadmaps = {
-                'frontend': [
-                    { title: 'HTML & CSS Fundamentals', time: 'Week 1-2', topics: ['Semantic HTML', 'Flexbox/Grid', 'Responsive Design'] },
-                    { title: 'JavaScript Basics', time: 'Week 3-5', topics: ['ES6+', 'DOM Manipulation', 'Async/Await'] },
-                    { title: 'React.js Mastery', time: 'Week 6-10', topics: ['Hooks', 'State Management (Redux)', 'Routing'] },
-                    { title: 'Build Projects', time: 'Week 11-12', topics: ['Portfolio Website', 'E-commerce Clone'] }
+
+                frontend: [
+                    { title: 'Internet & Web Basics', time: '1 Week', topics: ['HTTP Verbs & Status Codes', 'DNS & Hosting Architecture', 'Browser Rendering Engine'] },
+                    { title: 'HTML5 Semantic Core', time: '1 Week', topics: ['SEO Best Practices', 'ARIA & Web Accessibility', 'Web Component Basics'] },
+                    { title: 'Advanced CSS Labs', time: '2 Weeks', topics: ['CSS Grid & Subgrid', 'Tailwind/SCSS Workflows', 'Custom Properties & Variables'] },
+                    { title: 'Modern JS Fundamentals', time: '2 Weeks', topics: ['Closures & Lexical Scope', 'Event Loop & Concurrency', 'Modules (ESM/CJS)'] },
+                    { title: 'DOM & Web APIs', time: '2 Weeks', topics: ['Web Workers', 'Intersection Observer', 'WebSockets for Client'] },
+                    { title: 'React Core Architecture', time: '3 Weeks', topics: ['Virtual DOM Reconciliation', 'Fiber Architecture', 'Server Components'] },
+                    { title: 'State & Logic Flow', time: '2 Weeks', topics: ['Redux Toolkit/TanStack Query', 'Optimistic UI Updates', 'Middleware Patterns'] },
+                    { title: 'Performance & Security', time: '2 Weeks', topics: ['Core Web Vitals', 'XSS/CSRF Prevention', 'Code Splitting Strategies'] },
+                    { title: 'Testing & Quality', time: '2 Weeks', topics: ['Jest & React Testing Library', 'Cypress E2E Buffering', 'Component Snapshotting'] },
+                    { title: 'Deployment & CI/CD', time: '1 Week', topics: ['Github Actions', 'Vercel Mastery', 'Environment Workflows'] }
                 ],
-                'backend': [
-                    { title: 'Server Basics (Node.js)', time: 'Week 1-3', topics: ['Event Loop', 'Modules', 'File System'] },
-                    { title: 'Express & APIs', time: 'Week 4-6', topics: ['REST Architecture', 'Middleware', 'Authentication'] },
-                    { title: 'Databases (MongoDB/SQL)', time: 'Week 7-9', topics: ['Schemas', 'Aggregation', 'Transactions'] },
-                    { title: 'Deployment', time: 'Week 10', topics: ['AWS/Heroku', 'Docker Basics', 'CI/CD'] }
+
+                backend: [
+                    { title: 'System Fundamentals', time: '1 Week', topics: ['OS Internals for Devs', 'TCP/UDP Protocols', 'Reverse Proxies'] },
+                    { title: 'Node.js Runtime', time: '2 Weeks', topics: ['Buffer & Stream APIs', 'Worker Threads', 'Event-Driven Patterns'] },
+                    { title: 'REST & GraphQL Design', time: '3 Weeks', topics: ['API Versioning', 'Pagination & HATEOAS', 'Schema Definitions'] },
+                    { title: 'Database Scalability', time: '3 Weeks', topics: ['Indexing Strategies', 'Database Normalization', 'ACID vs BASE'] },
+                    { title: 'Auth Architecture', time: '2 Weeks', topics: ['OAuth 2.0 Flow', 'Refresh Token Rotation', 'RBAC & ABAC'] },
+                    { title: 'Microservices & Queues', time: '3 Weeks', topics: ['RabbitMQ/Kafka', 'Circuit Breaker Pattern', 'Docker Swarm/K8s'] },
+                    { title: 'Cloud Mastery', time: '3 Weeks', topics: ['Serverless Functions', 'Object Storage (S3)', 'IaC with Terraform'] },
+                    { title: 'Security & Monitoring', time: '2 Weeks', topics: ['OWASP Top 10 Backend', 'ELK Stack', 'Rate Limiting Algorithms'] }
                 ],
-                'data': [
-                    { title: 'Python & Math', time: 'Week 1-4', topics: ['Python Syntax', 'Linear Algebra', 'Statistics'] },
-                    { title: 'Data Analysis', time: 'Week 5-8', topics: ['Pandas', 'NumPy', 'Data Visualization (Matplotlib)'] },
-                    { title: 'Machine Learning Basics', time: 'Week 9-12', topics: ['Scikit-Learn', 'Regression', 'Classification'] },
-                    { title: 'Deep Learning & Projects', time: 'Week 13+', topics: ['TensorFlow/PyTorch', 'Neural Networks', 'Kaggle Competitions'] }
+
+                fullstack: [
+                    { title: 'Advanced UI Design', time: '4 Weeks', topics: ['Design Systems', 'Advanced Framer Motion', 'Multi-step Form Logic'] },
+                    { title: 'Scalable API Engine', time: '4 Weeks', topics: ['Prisma/TypeORM Patterns', 'PostgreSQL Optimization', 'Validation Layers'] },
+                    { title: 'Security Tunneling', time: '2 Weeks', topics: ['CORS & CSP Policies', 'HTTPS/SSL Management', 'Data Encryption'] },
+                    { title: 'Real-time Integration', time: '2 Weeks', topics: ['Socket.io Implementations', 'Redis Caching', 'Real-time Analytics'] },
+                    { title: 'Full Build & Scale', time: '4 Weeks', topics: ['CI/CD Pipelines', 'AWS Deployment', 'Zero-downtime Updates'] },
+                    { title: 'Monitoring & Growth', time: '2 Weeks', topics: ['Google Analytics API', 'Error Tracking (Sentry)', 'AB Testing'] }
                 ],
-                'devops': [
-                    { title: 'Linux & Scripting', time: 'Week 1-3', topics: ['Shell Scripting', 'File Permissions', 'Networking Basics'] },
-                    { title: 'Containerization', time: 'Week 4-6', topics: ['Docker', 'Docker Compose', 'Container Registries'] },
-                    { title: 'CI/CD Pipelines', time: 'Week 7-9', topics: ['GitHub Actions', 'Jenkins', 'Automated Testing'] },
-                    { title: 'Orchestration & Cloud', time: 'Week 10-12', topics: ['Kubernetes', 'AWS/Azure Basics', 'Terraform'] }
+
+                ai_ml: [
+                    { title: 'Math for AI/ML', time: '3 Weeks', topics: ['Vector Calculus', 'Probability Distributions', 'Matrix Decomposition'] },
+                    { title: 'Scientific Computing', time: '2 Weeks', topics: ['Scikit-learn Pipelines', 'Pandas Vectorization', 'Seaborn Viz'] },
+                    { title: 'Supervised Learning', time: '3 Weeks', topics: ['Gradient Descent', 'Support Vector Machines', 'Ensemble Methods'] },
+                    { title: 'Neural Networks', time: '4 Weeks', topics: ['Deep Learning Theory', 'CNNs & RNNs', 'Optimization (Adam/SGD)'] },
+                    { title: 'Generative AI & LLMs', time: '4 Weeks', topics: ['Transformer Architecture', 'Fine-tuning Models', 'Prompt Engineering'] },
+                    { title: 'MLOps & Deployment', time: '3 Weeks', topics: ['Model Versioning (DVC)', 'BentoML/Triton', 'Inference Optimization'] }
                 ],
-                'mobile': [
-                    { title: 'Language Basics', time: 'Week 1-4', topics: ['Swift (iOS) or Kotlin (Android)', 'OOP Concepts'] },
-                    { title: 'UI Development', time: 'Week 5-8', topics: ['Layouts', 'Views', 'Responsive UI'] },
-                    { title: 'State & Networking', time: 'Week 9-11', topics: ['State Management', 'API Integration', 'Local Storage'] },
-                    { title: 'Publishing', time: 'Week 12', topics: ['App Store Guidelines', 'Beta Testing', 'CI/CD for Mobile'] }
+
+                dataScience: [
+                    { title: 'Python for Data Analysis', time: '3 Weeks', topics: ['Advanced Pandas', 'Dask for Big Data', 'Jupyter Lab Workflows'] },
+                    { title: 'Statistical Mastery', time: '3 Weeks', topics: ['Parametric vs Non-parametric', 'P-value Interpretation', 'Correlation vs Causation'] },
+                    { title: 'Visualization Storytelling', time: '2 Weeks', topics: ['Plotly Interactivity', 'Dashboarding Architecture', 'Data Infographics'] },
+                    { title: 'Big Data Engineering', time: '4 Weeks', topics: ['Spark Streaming', 'Data Warehousing (Snowflake)', 'ETL Pipelines'] },
+                    { title: 'AI for Data insight', time: '3 Weeks', topics: ['Anomaly Detection', 'Recommendation Engines', 'Clustering Logic'] }
                 ],
-                'security': [
-                    { title: 'Networking Fundamentals', time: 'Week 1-3', topics: ['OSI Model', 'TCP/IP', 'DNS', 'HTTP/HTTPS'] },
-                    { title: 'System Security', time: 'Week 4-6', topics: ['Linux Security', 'Windows Internals', 'Cryptography'] },
-                    { title: 'Web Security', time: 'Week 7-9', topics: ['OWASP Top 10', 'Burp Suite', 'SQL Injection', 'XSS'] },
-                    { title: 'Penetration Testing', time: 'Week 10-12', topics: ['Reconnaissance', 'Exploitation', 'Reporting'] }
+
+                mobile: [
+                    { title: 'Mobile Architecture', time: '3 Weeks', topics: ['MVVM & Viper Patterns', 'Stateful vs Stateless', 'Native Navigation'] },
+                    { title: 'Flutter/RN Deep Dive', time: '5 Weeks', topics: ['Custom Painters', 'Bridge Architecture', 'Animation Controllers'] },
+                    { title: 'Native Performance', time: '3 Weeks', topics: ['Memory Leaks Detect', 'Threading & Background Tasks', 'Database (SQLite/Realm)'] },
+                    { title: 'System Services', time: '2 Weeks', topics: ['Camera API Integration', 'Biometric Auth', 'Local Notifications'] },
+                    { title: 'Market Readiness', time: '2 Weeks', topics: ['Store Guidelines', 'A/B Testing on Apps', 'Crashlytics Analysis'] }
                 ],
-                'design': [
-                    { title: 'Design Principles', time: 'Week 1-3', topics: ['Color Theory', 'Typography', 'Visual Hierarchy'] },
-                    { title: 'UX Research', time: 'Week 4-6', topics: ['User Personas', 'User Journey Maps', 'Usability Testing'] },
-                    { title: 'Wireframing & Prototyping', time: 'Week 7-9', topics: ['Figma Mastery', 'Low/High Fidelity', 'Interactions'] },
-                    { title: 'Design Systems', time: 'Week 10-12', topics: ['Component Libraries', 'Auto Layout', 'Developer Handoff'] }
+
+                design: [
+                    { title: 'Visual Systems', time: '2 Weeks', topics: ['The Golden Ratio', 'Layout Grids & Rhythm', 'Micro-copywriting'] },
+                    { title: 'Figma Engineering', time: '3 Weeks', topics: ['Advanced Components', 'Variables & Tokens', 'Developer Handoff'] },
+                    { title: 'User Psychology', time: '4 Weeks', topics: ['Gestalt Principles', 'Hicks Law', 'Heuristic Evaluation'] },
+                    { title: 'Prototyping Labs', time: '3 Weeks', topics: ['Conditional Logic Proto', 'Micro-animations', 'Accessibility Audit'] }
                 ],
-                'default': [
-                    { title: 'Foundations', time: 'Month 1', topics: ['Core Concepts', 'Basic Syntax', 'Simple Tools'] },
-                    { title: 'Intermediate Skills', time: 'Month 2', topics: ['Frameworks', 'Best Practices', 'Debugging'] },
-                    { title: 'Advanced & Projects', time: 'Month 3', topics: ['Complex Logic', 'System Design', 'Real-world Capstone'] }
+
+                blockchain: [
+                    { title: 'Distributed Systems', time: '2 Weeks', topics: ['Consensus Algos (PoW/PoS)', 'Merkle Trees', 'Networking Overlays'] },
+                    { title: 'Smart Contract Logic', time: '5 Weeks', topics: ['Solidity Security', 'Gas Optimization', 'Upgradeable Contracts'] },
+                    { title: 'Web3 Ecosystem', time: '3 Weeks', topics: ['Decentralized ID', 'The Graph (Indexing)', 'EVM Architecture'] },
+                    { title: 'DeFi & Asset Design', time: '4 Weeks', topics: ['Liquidity Pools', 'Oracle Networks (Chainlink)', 'DAOs'] }
+                ],
+
+                gameDev: [
+                    { title: 'Engine Fundamentals', time: '4 Weeks', topics: ['Render Pipelines', 'Physics Simulation', 'Prefabs & Archetypes'] },
+                    { title: 'Game Scripting Labs', time: '4 Weeks', topics: ['C# for Unity', 'AI State Machines', 'Input Systems'] },
+                    { title: 'VFX & Shaders', time: '4 Weeks', topics: ['HLSL/GLSL Basics', 'Particle Systems', 'Post-processing Stack'] },
+                    { title: 'Optimized Systems', time: '3 Weeks', topics: ['Occlusion Culling', 'Texture Atlasing', 'Networking (LLAPI)'] }
+                ],
+
+                devops: [
+                    { title: 'Infrastructure Ops', time: '3 Weeks', topics: ['Linux Optimization', 'Shell Scripting', 'SSH/Key Management'] },
+                    { title: 'IaC & Automation', time: '4 Weeks', topics: ['Terraform Workspaces', 'CloudFormation', 'Ansible Vault'] },
+                    { title: 'Kubernetes Mastery', time: '5 Weeks', topics: ['Helm Charts', 'Service Meshes (Istio)', 'Ingress Controllers'] },
+                    { title: 'SRE & Reliability', time: '3 Weeks', topics: ['SLAs/SLOs/SLIs', 'Chaos Engineering', 'Auto-scaling Policies'] }
+                ],
+
+                cybersecurity: [
+                    { title: 'Defensive Security', time: '4 Weeks', topics: ['IDS/IPS Systems', 'SIEM Management', 'SOC Workflows'] },
+                    { title: 'Offensive Strategies', time: '5 Weeks', topics: ['Penetration Testing', 'Nmap Scripting Engine', 'Reverse Engineering'] },
+                    { title: 'Identity & Encryption', time: '3 Weeks', topics: ['Public Key Infra (PKI)', 'SAML/OIDC', 'Zero Trust Architecture'] },
+                    { title: 'Secure App Dev', time: '3 Weeks', topics: ['DAST/SAST Integration', 'Secret Management', 'Dependency Auditing'] }
+                ],
+
+                qa: [
+                    { title: 'Automation Arch', time: '4 Weeks', topics: ['Page Object Model', 'Data-driven testing', 'Parallel Execution'] },
+                    { title: 'Native App Testing', time: '3 Weeks', topics: ['Appium/Detox', 'Emulators vs Physical', 'Gesture Testing'] },
+                    { title: 'API & Performance', time: '3 Weeks', topics: ['k6 Performance Testing', 'Contract Testing', 'Postman Scripts'] },
+                    { title: 'QA Intelligence', time: '2 Weeks', topics: ['Visual Regression', 'AI-driven Test Gen', 'CI Integration'] }
+                ],
+
+                product: [
+                    { title: 'Strategy & Ops', time: '4 Weeks', topics: ['TAM/SAM/SOM', 'Pricing Strategy', 'Product-Led Growth'] },
+                    { title: 'Technical Roadmap', time: '3 Weeks', topics: ['Gantt vs Agile', 'Feature Prioritization', 'MVP Definitions'] },
+                    { title: 'Analytics Mastery', time: '4 Weeks', topics: ['Funnel Optimization', 'Amplitude/Mixpanel', 'Cohort Analysis'] },
+                    { title: 'Team Leadership', time: '2 Weeks', topics: ['Stakeholder Mgmt', 'Conflict Resolution', 'Agility Coaching'] }
                 ]
             };
 
             const lowerRole = role.toLowerCase();
-            let key = 'default';
+            let key = ''; // Default fallback
+
             if (lowerRole.includes('front')) key = 'frontend';
             else if (lowerRole.includes('back')) key = 'backend';
-            else if (lowerRole.includes('data')) key = 'data';
-            else if (lowerRole.includes('scien')) key = 'data';
-            else if (lowerRole.includes('devops') || lowerRole.includes('cloud')) key = 'devops';
+            else if (lowerRole.includes('full')) key = 'fullstack';
+            else if (lowerRole.includes('data')) key = 'dataScience';
+            else if (lowerRole.includes('ai') || lowerRole.includes('ml') || lowerRole.includes('intell')) key = 'ai_ml';
+            else if (lowerRole.includes('devops') || lowerRole.includes('cloud') || lowerRole.includes('infra')) key = 'devops';
             else if (lowerRole.includes('mobile') || lowerRole.includes('app') || lowerRole.includes('ios') || lowerRole.includes('android')) key = 'mobile';
-            else if (lowerRole.includes('sec') || lowerRole.includes('cyber')) key = 'security';
-            else if (lowerRole.includes('ui') || lowerRole.includes('ux') || lowerRole.includes('design')) key = 'design';
+            else if (lowerRole.includes('sec') || lowerRole.includes('cyber')) key = 'cybersecurity';
+            else if (lowerRole.includes('block') || lowerRole.includes('crypto')) key = 'blockchain';
+            else if (lowerRole.includes('game') || lowerRole.includes('unity') || lowerRole.includes('unreal')) key = 'gameDev';
+            else if (lowerRole.includes('design') || lowerRole.includes('ui') || lowerRole.includes('ux')) key = 'design';
+            else if (lowerRole.includes('test') || lowerRole.includes('qa') || lowerRole.includes('qual')) key = 'qa';
+            else if (lowerRole.includes('prod') || lowerRole.includes('manage')) key = 'product';
+
+            const selectedSteps = mockRoadmaps[key] || mockRoadmaps[' '];
 
             setRoadmap({
                 role: role,
-                steps: mockRoadmaps[key]
+                steps: selectedSteps
             });
 
             // Save to Backend
             userApi.saveRoadmap({
                 role: role,
-                steps: mockRoadmaps[key].map(s => ({ ...s, status: 'pending' }))
+                steps: selectedSteps.map(s => ({
+                    ...s,
+                    time: s.time || '1-2 Weeks',
+                    topics: s.topics || ['Core Concepts', 'Best Practices', 'Exercise'],
+                    status: 'pending'
+                }))
             }).catch(console.error);
 
             setLoading(false);
@@ -178,11 +251,11 @@ export default function Roadmap() {
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-bold text-lg text-black dark:text-white">{step.title}</h3>
                                             <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">
-                                                {step.time}
+                                                {step.time || '1-2 Weeks'}
                                             </span>
                                         </div>
                                         <ul className="space-y-2">
-                                            {step.topics.map((topic, i) => (
+                                            {(step.topics || ['Mastering core principles', 'Real-world application', 'Project integration']).map((topic, i) => (
                                                 <li key={i} className="flex items-center gap-2 text-sm text-black dark:text-white">
                                                     <CheckCircleIcon className="w-4 h-4 text-green-500" />
                                                     {topic}

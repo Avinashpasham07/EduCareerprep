@@ -204,6 +204,9 @@ exports.applyJob = async (req, res, next) => {
             // Don't fail the application if notification fails
         }
 
+        // Award 20 XP for applying
+        await user.awardXP(20);
+
         res.json({ message: 'Application submitted successfully', appliedJobs: user.appliedJobs });
     } catch (err) {
         console.error('[API] Critical Apply Job Error:', err);
@@ -217,23 +220,100 @@ exports.applyJob = async (req, res, next) => {
 exports.updateApplicationStatus = async (req, res, next) => {
     try {
         const { id, userId } = req.params;
-        const { status } = req.body;
+        const { status, date } = req.body;
+        console.log(`[API] Updating status for Job ${id}, User ${userId} to ${status}`);
 
         const job = await Job.findById(id);
-        if (!job) return res.status(404).json({ message: 'Job not found' });
+        if (!job) {
+            console.log('[API] Job not found');
+            return res.status(404).json({ message: 'Job not found' });
+        }
 
         if (job.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            console.log('[API] Unauthorized update attempt');
             return res.status(403).json({ message: 'Not authorized' });
         }
 
         const appIndex = job.applications.findIndex(app => app.user.toString() === userId);
-        if (appIndex === -1) return res.status(404).json({ message: 'Application not found' });
+        if (appIndex === -1) {
+            console.log('[API] Application not found in job');
+            return res.status(404).json({ message: 'Application not found' });
+        }
 
+        // Update Status
         job.applications[appIndex].status = status;
+
+        // Handle Interview Scheduling
+        if (status === 'interview') {
+            const { meetingLink, date } = req.body;
+            job.applications[appIndex].interviewDetails = {
+                meetingLink: meetingLink || '',
+                date: date || new Date(),
+                status: 'scheduled'
+            };
+        }
+
         await job.save();
+        console.log('[API] Job saved with new status');
+
+        // Sync with User Profile
+        const user = await User.findById(userId);
+        if (user) {
+            const userAppIndex = user.appliedJobs.findIndex(a => a.job.toString() === id);
+            if (userAppIndex > -1) {
+                user.appliedJobs[userAppIndex].status = status;
+
+                // Award 50 XP if shortlisted or interview scheduled
+                if (status === 'shortlisted' || status === 'interview') {
+                    await user.awardXP(50);
+                } else if (status === 'hired') {
+                    await user.awardXP(100);
+                } else {
+                    await user.save();
+                }
+
+                console.log('[API] User profile synced');
+            } else {
+                console.log('[API] Job not found in user appliedJobs');
+            }
+        } else {
+            console.log('[API] User not found for sync');
+        }
+
+        // Notify User
+        // ... (keep notification logic same or wrapped)
+        try {
+            let message = '';
+            let link = '/applications';
+
+            if (status === 'shortlisted') {
+                message = `Congratulations! You have been shortlisted for "${job.title}" at ${job.company}.`;
+            } else if (status === 'interview') {
+                message = `Interview Scheduled! Your interview for "${job.title}" is set.`;
+                link = `/applications`; // Or direct link to interview room if we had a dedicated page for just that
+            } else if (status === 'hired') {
+                message = `YOU'RE HIRED! Offer received for "${job.title}" at ${job.company}.`;
+            } else if (status === 'rejected') {
+                message = `Update on your application for "${job.title}".`;
+            }
+
+            if (message) {
+                await Notification.create({
+                    recipient: userId,
+                    sender: req.user.id,
+                    type: 'job',
+                    title: 'Application Update',
+                    message,
+                    link
+                });
+            }
+        } catch (notifErr) {
+            console.error("Notification Error:", notifErr);
+        }
 
         res.json({ message: 'Status updated', application: job.applications[appIndex] });
     } catch (err) {
+        console.error('[API] Update Status Error:', err);
         next(err);
     }
 };

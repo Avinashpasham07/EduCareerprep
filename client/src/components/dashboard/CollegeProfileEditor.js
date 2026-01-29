@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Button, Card, Section } from '../common';
 import { userApi } from '../../services/api';
 import { updateUser } from '../../store/slices/authSlice';
-import { PhotoIcon, XMarkIcon, PlusIcon, LinkIcon, VideoCameraIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, XMarkIcon, PlusIcon, LinkIcon, VideoCameraIcon, MapPinIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
 
 export default function CollegeProfileEditor({ onCancel, college }) {
     const { user } = useSelector((s) => s.auth);
@@ -92,11 +92,11 @@ export default function CollegeProfileEditor({ onCancel, college }) {
             }
 
             dispatch(updateUser(res.data));
-            alert('Profile updated successfully! ✅');
+            alert('Profile updated successfully!');
             if (onCancel) onCancel();
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Failed to update profile ❌');
+            alert(err.response?.data?.message || 'Failed to update profile');
         } finally {
             setUploading(false);
         }
@@ -210,9 +210,7 @@ export default function CollegeProfileEditor({ onCancel, college }) {
                                 <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                             ) : (
                                 <>
-                                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
-                                        🏫
-                                    </div>
+                                    <BuildingLibraryIcon className="w-12 h-12 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
                                     <p className="text-xs font-bold text-slate-500">Upload Logo File</p>
                                 </>
                             )}

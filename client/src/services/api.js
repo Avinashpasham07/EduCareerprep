@@ -11,6 +11,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
     baseURL: API_URL,
+    timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -46,13 +47,14 @@ export const userApi = {
     getColleges: () => api.get('/user/colleges'),
     getCollegeById: (id) => api.get(`/user/colleges/${id}`),
     toggleSaveCollege: (id) => api.post(`/user/colleges/save/${id}`),
+    addReview: (id, data) => api.post(`/user/colleges/review/${id}`, data),
     getDashboardStats: () => api.get('/user/dashboard-stats'),
     getJobs: (params) => api.get('/jobs', { params }),
     createJob: (data) => api.post('/jobs', data),
     getMyJobs: () => api.get('/jobs/my-jobs'),
     toggleSaveJob: (id) => api.post(`/jobs/${id}/save`),
     applyJob: (id, data) => api.post(`/jobs/${id}/apply`, data),
-    updateApplicationStatus: (jobId, userId, status) => api.put(`/jobs/${jobId}/applications/${userId}/status`, { status }),
+    updateApplicationStatus: (jobId, userId, data) => api.put(`/jobs/${jobId}/applications/${userId}/status`, data),
     incrementJobView: (id) => api.post(`/jobs/${id}/view`),
     // Dashboard Stats & Challenges
     // getDashboardStats is already defined above
@@ -66,8 +68,7 @@ export const userApi = {
 
     // Kanban
     getApplications: () => api.get('/user/applications'),
-    // updateApplicationStatus is already defined above
-
+    updateMyApplicationStatus: (jobId, status) => api.put('/user/applications/status', { jobId, status }),
     // Gamification
     getLeaderboard: () => api.get('/user/leaderboard'),
 

@@ -14,9 +14,8 @@ import {
   BookmarkIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import Footer from '../components/common/Footer';
 import JobDetailModal from '../components/dashboard/JobDetailModal';
-import JobCard from '../components/common/JobCard';
+import { JobCard } from '../components/common/JobCard';
 
 export default function Jobs() {
   const { user } = useSelector((s) => s.auth);
@@ -37,6 +36,8 @@ export default function Jobs() {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyForm, setApplyForm] = useState({ name: '', email: '', resume: '', coverLetter: '' });
   const [isApplying, setIsApplying] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'applied', 'shortlisted', 'interview', 'rejected'
+  const [showOnlyNew, setShowOnlyNew] = useState(false);
 
 
   useEffect(() => {
@@ -107,7 +108,36 @@ export default function Jobs() {
   // currently `filteredJobs` is just `jobs` since we trust backend filter for main queries.
   // Add client-side search only if you want to search within *fetched* results, 
   // but better to rely on backend for consistency.
-  const displayJobs = jobs;
+  // Enhanced filtering logic
+  const displayJobs = jobs.filter(job => {
+    // Cross-reference with appliedJobs for status
+    const app = appliedJobs.find(a => {
+      const aJobId = a.job ? (a.job._id || a.job.id || a.job) : (a._id || a.id);
+      return aJobId === (job._id || job.id);
+    });
+    const status = app ? (app.status || 'applied') : null;
+
+    // Apply Status Filter
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'applied' && !app) return false;
+      if (statusFilter === 'shortlisted' && status !== 'shortlisted') return false;
+      if (statusFilter === 'interview' && status !== 'interview') return false;
+      if (statusFilter === 'rejected' && status !== 'rejected') return false;
+    }
+
+    // Apply "Newly Posted" Filter (last 7 days AND not applied)
+    if (showOnlyNew) {
+      // Exclude if already applied
+      if (app) return false;
+
+      const postDate = new Date(job.createdAt);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      if (postDate < sevenDaysAgo) return false;
+    }
+
+    return true;
+  });
 
   // getTypeColor removed (replaced by common component)
 
@@ -157,7 +187,19 @@ export default function Jobs() {
   };
 
   const viewJobDetails = (job) => {
-    setSelectedJob(job);
+    // Find application status to pass to modal
+    const app = appliedJobs.find(a => {
+      const aJobId = a.job ? (a.job._id || a.job.id || a.job) : (a._id || a.id);
+      return aJobId === (job._id || job.id);
+    });
+
+    const jobWithStatus = {
+      ...job,
+      status: app ? (app.status || 'applied') : null,
+      interviewDetails: app ? app.interviewDetails : null
+    };
+
+    setSelectedJob(jobWithStatus);
     // Increment view count
     userApi.incrementJobView(job._id || job.id).catch(console.error);
   };
@@ -184,10 +226,46 @@ export default function Jobs() {
           </p>
         </div>
 
+        {/* Status Pills and Special Tabs */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <button
+            onClick={() => { setStatusFilter('all'); setShowOnlyNew(false); }}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${statusFilter === 'all' && !showOnlyNew ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-primary-500'}`}
+          >
+            All Jobs
+          </button>
+          <button
+            onClick={() => { setShowOnlyNew(!showOnlyNew); setStatusFilter('all'); }}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition-all border flex items-center gap-2 ${showOnlyNew ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-amber-500'}`}
+          >
+            <SparklesIcon className="w-4 h-4" />
+            Newly Posted
+          </button>
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden md:block" />
+          <button
+            onClick={() => { setStatusFilter('applied'); setShowOnlyNew(false); }}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${statusFilter === 'applied' ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-blue-500'}`}
+          >
+            Applied
+          </button>
+          <button
+            onClick={() => { setStatusFilter('shortlisted'); setShowOnlyNew(false); }}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${statusFilter === 'shortlisted' ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-emerald-500'}`}
+          >
+            Shortlisted
+          </button>
+          <button
+            onClick={() => { setStatusFilter('rejected'); setShowOnlyNew(false); }}
+            className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${statusFilter === 'rejected' ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-red-500'}`}
+          >
+            Rejected
+          </button>
+        </div>
+
         {/* Search and Filters */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
+          <div className="flex flex-col gap-4">
+            <div className="relative">
               <MagnifyingGlassIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
               <input
                 type="text"
@@ -197,13 +275,14 @@ export default function Jobs() {
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-black dark:text-white placeholder-slate-500"
               />
             </div>
-            <div className="flex gap-4">
-              <div className="relative">
+
+            <div className="grid grid-cols-2 lg:flex lg:flex-row gap-4">
+              <div className="relative flex-1">
                 <FunnelIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="pl-11 pr-8 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none appearance-none cursor-pointer text-black dark:text-white font-medium"
+                  className="w-full pl-11 pr-1 lg:pr-8 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none appearance-none cursor-pointer text-black dark:text-white font-medium text-sm lg:text-base"
                 >
                   <option value="all">All Types</option>
                   <option value="full-time">Full Time</option>
@@ -211,12 +290,12 @@ export default function Jobs() {
                   <option value="contract">Contract</option>
                 </select>
               </div>
-              <div className="relative">
+              <div className="relative flex-1">
                 <MapPinIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="pl-11 pr-8 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none appearance-none cursor-pointer text-black dark:text-white font-medium"
+                  className="w-full pl-11 pr-1 lg:pr-8 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none appearance-none cursor-pointer text-black dark:text-white font-medium text-sm lg:text-base"
                 >
                   <option value="all">All Locations</option>
                   <option value="bangalore">Bangalore</option>
@@ -225,7 +304,6 @@ export default function Jobs() {
                   <option value="remote">Remote</option>
                 </select>
               </div>
-
             </div>
           </div>
         </div>
@@ -271,18 +349,30 @@ export default function Jobs() {
         <div className="space-y-4">
           {displayJobs.length > 0 ? (
             <>
-              {displayJobs.map((job) => (
-                <JobCard
-                  key={job._id || job.id}
-                  job={job}
-                  onClick={() => viewJobDetails(job)}
-                  onSave={() => saveJob(job)}
-                  onApply={() => openApplyModal(job)}
-                  isSaved={savedJobs.some(j => (j._id || j.id) === (job._id || job.id))}
-                  isApplied={appliedJobs.some(j => (j._id || j.id) === (job._id || job.id))}
-                  variant="card"
-                />
-              ))}
+              {displayJobs.map((job) => {
+                // Helper to find application status
+                const app = appliedJobs.find(a => {
+                  // Handle both populated application object and flattened job/optimistic update
+                  const aJobId = a.job ? (a.job._id || a.job.id || a.job) : (a._id || a.id);
+                  return aJobId === (job._id || job.id);
+                });
+                const status = app ? (app.status || 'applied') : null;
+                const interviewDetails = app ? app.interviewDetails : null;
+                const isApplied = !!app;
+
+                return (
+                  <JobCard
+                    key={job._id || job.id}
+                    job={{ ...job, status, interviewDetails }} // Pass status & details
+                    onClick={() => viewJobDetails(job)}
+                    onSave={() => saveJob(job)}
+                    onApply={() => openApplyModal(job)}
+                    isSaved={savedJobs.some(j => (j._id || j.id) === (job._id || job.id))}
+                    isApplied={isApplied}
+                    variant="card"
+                  />
+                );
+              })}
 
               {hasMore && (
                 <div className="flex justify-center pt-8">
@@ -402,7 +492,6 @@ export default function Jobs() {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

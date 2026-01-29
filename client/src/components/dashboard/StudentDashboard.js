@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { userApi } from '../../services/api';
-import Footer from '../common/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     BriefcaseIcon,
@@ -27,7 +26,7 @@ import {
     MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import JobCard from '../common/JobCard';
+import { JobCard } from '../common/JobCard';
 import CollegeCard from '../common/CollegeCard';
 import Leaderboard from '../gamification/Leaderboard';
 
@@ -155,10 +154,10 @@ export default function StudentDashboard() {
                                 Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl hover:border-emerald-500 hover:border-2" />)
                             ) : (
                                 <>
-                                    <StatItem label="Applied Jobs" value={stats?.appliedJobs?.length || 0} icon={BriefcaseIcon} trend="+2 this week" />
+                                    <StatItem label="Applied Jobs" value={stats?.appliedJobs?.length || 0} icon={BriefcaseIcon} />
                                     <StatItem label="Saved Items" value={stats?.savedJobs?.length || 0} icon={BookOpenIcon} delay={0.1} />
                                     <StatItem label="Interviews" value={stats?.interviews || 0} icon={UserCircleIcon} delay={0.2} />
-                                    <StatItem label="Profile Score" value={`${stats?.profileScore || 0}%`} icon={ChartBarIcon} delay={0.3} type="progress" trend="Complete the Project" />
+                                    <StatItem label="Profile Score" value={`${stats?.profileScore || 0}%`} icon={ChartBarIcon} delay={0.3} type="progress" />
                                 </>
                             )}
                         </motion.div>
@@ -384,7 +383,7 @@ export default function StudentDashboard() {
 
             </div>
 
-            <Footer />
+
 
         </div>
     );

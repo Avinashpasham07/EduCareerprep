@@ -4,23 +4,33 @@ import {
     MapPinIcon,
     CurrencyRupeeIcon,
     CalendarIcon,
-    BookmarkIcon
+    BookmarkIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    SparklesIcon,
+    TrophyIcon,
+    XCircleIcon
 } from '@heroicons/react/24/outline';
-import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 
-export default function JobCard({
+export function JobCard({
     job,
     onClick,
     onSave,
     onApply,
     isSaved,
     isApplied,
-    variant = 'card' // 'card' or 'row'
+    variant = 'card'
 }) {
+    const getTypeColor = (type) => {
+        switch (type) {
+            case 'full-time': return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-green-200 dark:border-green-800';
+            case 'internship': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+            case 'contract': return 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+            case 'part-time': return 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400 border-orange-200 dark:border-orange-800';
+            default: return 'bg-slate-50 text-slate-700 dark:bg-slate-900/20 dark:text-slate-400 border-slate-200 dark:border-slate-800';
+        }
+    };
 
-    // -------------------------------------------
-    // Variant: ROW (Used in Dashboard / Compact)
-    // -------------------------------------------
     if (variant === 'row') {
         return (
             <div onClick={onClick} className="group flex items-center gap-5 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border border-slate-300 hover:border-emerald-200 dark:hover:border-white/10">
@@ -30,18 +40,6 @@ export default function JobCard({
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <h4 className="font-bold text-lg text-slate-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{job.title}</h4>
-                        <div className="flex gap-2">
-                            {job.hiringType && job.hiringType !== 'general' && (
-                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg ${job.hiringType === 'on-campus' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'}`}>
-                                    {job.hiringType === 'on-campus' ? '🏫 On-Campus' : '🎓 Off-Campus'}
-                                </span>
-                            )}
-                            {job.type && (
-                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg">
-                                    {job.type}
-                                </span>
-                            )}
-                        </div>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold truncate">{job.company}</p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400 font-bold">
@@ -53,30 +51,15 @@ export default function JobCard({
         );
     }
 
-    // -------------------------------------------
-    // Variant: CARD (Used in Jobs List)
-    // -------------------------------------------
-    const getTypeColor = (type) => {
-        switch (type) {
-            case 'full-time': return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-green-200 dark:border-green-800';
-            case 'internship': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800';
-            case 'contract': return 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 dark:border-purple-800';
-            case 'part-time': return 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400 border-orange-200 dark:border-orange-800';
-            default: return 'bg-slate-50 text-slate-700 dark:bg-slate-900/20 dark:text-slate-400 border-slate-200 dark:border-slate-800';
-        }
-    };
-
     return (
         <div className="group bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 hover:border-primary-500/50 dark:hover:border-primary-500/50 transition-all shadow-sm hover:shadow-md">
             <div className="flex flex-col lg:flex-row gap-6">
-                {/* Logo */}
                 <div className="flex-shrink-0">
                     <div className="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center border-emerald-500 border justify-center">
                         <BuildingOfficeIcon className="w-8 h-8 text-emerald-400" />
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                         <div>
@@ -87,11 +70,6 @@ export default function JobCard({
                         </div>
                         <div className="flex flex-col items-end gap-2">
                             <div className="flex gap-2">
-                                {job.hiringType && job.hiringType !== 'general' && (
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${job.hiringType === 'on-campus' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'}`}>
-                                        {job.hiringType === 'on-campus' ? '🏫 On-Campus' : '🎓 Off-Campus'}
-                                    </span>
-                                )}
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getTypeColor(job.type)}`}>
                                     {job.type}
                                 </span>
@@ -108,37 +86,56 @@ export default function JobCard({
                         <span className="flex items-center gap-1.5"><CalendarIcon className="w-4 h-4" /> Posted {new Date(job.createdAt).toLocaleDateString()}</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {job.skills?.slice(0, 5).map((skill, i) => (
-                            <span key={i} className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700">
-                                {skill}
-                            </span>
-                        ))}
-                    </div>
-
                     <div className="flex items-center gap-3 mt-2">
                         <button
                             onClick={onClick}
-                            className="btn-secondary-new py-2 px-4 text-sm"
+                            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition-all"
                         >
                             Details
                         </button>
+
                         {onApply && (
                             <button
                                 onClick={onApply}
                                 disabled={isApplied}
-                                className="bg-green-500 text-white rounded-xl py-2 px-4 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                className={`rounded-xl py-2 px-4 text-sm font-bold transition-all ${isApplied
+                                    ? 'bg-slate-100 text-slate-500'
+                                    : 'bg-green-500 text-white hover:bg-green-600'
+                                    }`}
                             >
-                                {isApplied ? 'Applied' : 'Apply Now'}
+                                {isApplied
+                                    ? (() => {
+                                        switch (job.status) {
+                                            case 'shortlisted': return <span className="text-emerald-600 flex items-center gap-1"><SparklesIcon className="w-4 h-4" /> Shortlisted</span>;
+                                            case 'interview': return <span className="text-amber-600 flex items-center gap-1"><CalendarDaysIcon className="w-4 h-4" /> Interview</span>;
+                                            case 'hired': return <span className="text-green-600 flex items-center gap-1"><TrophyIcon className="w-4 h-4" /> Hired</span>;
+                                            case 'rejected': return <span className="text-red-500 flex items-center gap-1"><XCircleIcon className="w-4 h-4" /> Rejected</span>;
+                                            default: return <><CheckCircleIcon className="w-4 h-4 inline-block mr-1 mb-0.5" /> Applied</>;
+                                        }
+                                    })()
+                                    : 'Apply Now'}
                             </button>
                         )}
+
                         {onSave && (
                             <button
                                 onClick={onSave}
                                 className="p-2 text-slate-400 hover:text-primary-600 transition-colors"
                             >
-                                {isSaved ? <BookmarkIconSolid className="w-5 h-5 fill-current text-primary-600" /> : <BookmarkIcon className="w-5 h-5" />}
+                                <BookmarkIcon className={`w-5 h-5 ${isSaved ? 'fill-current text-primary-600' : ''}`} />
                             </button>
+                        )}
+
+                        {isApplied && (job.status === 'interview' || job.status === 'shortlisted') && job.interviewDetails?.meetingLink && (
+                            <a
+                                href={job.interviewDetails.meetingLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="ml-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs transition-colors shadow-md animate-pulse"
+                            >
+                                <CalendarDaysIcon className="w-4 h-4 inline-block mr-1 mb-0.5" /> Join Interview
+                            </a>
                         )}
                     </div>
                 </div>

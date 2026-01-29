@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { userApi } from '../services/api';
 import {
     BriefcaseIcon,
@@ -7,16 +8,20 @@ import {
     XCircleIcon,
     ChatBubbleBottomCenterTextIcon,
     CurrencyDollarIcon,
-    MapPinIcon
+    MapPinIcon,
+    CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 
 const COLUMNS = [
     { id: 'applied', title: 'Applied', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { id: 'screening', title: 'Screening', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { id: 'shortlisted', title: 'Shortlisted', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
     { id: 'interview', title: 'Interview', color: 'bg-amber-100 text-amber-700 border-amber-200' },
     { id: 'offer', title: 'Offer', color: 'bg-green-100 text-green-700 border-green-200' },
+    { id: 'hired', title: 'Hired', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
     { id: 'rejected', title: 'Rejected', color: 'bg-red-100 text-red-700 border-red-200' }
 ];
+
+
 
 export default function Applications() {
     const [applications, setApplications] = useState([]);
@@ -68,7 +73,7 @@ export default function Applications() {
             // Find the job ID associated with this application
             const app = applications.find(a => a.job._id === appId || a._id === appId);
             if (app) {
-                await userApi.updateApplicationStatus(app.job._id, status);
+                await userApi.updateMyApplicationStatus(app.job._id, status);
             }
         } catch (err) {
             console.error("Failed to update status", err);
@@ -141,6 +146,24 @@ export default function Applications() {
                                                         <CurrencyDollarIcon className="w-3 h-3" /> {app.job?.salary || 'N/A'}
                                                     </div>
                                                 </div>
+
+                                                {
+                                                    app.status === 'interview' && app.interviewDetails && (
+                                                        <div className="mb-3">
+                                                            <a
+                                                                href={app.interviewDetails.meetingLink || '#'}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="block w-full text-center py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition-colors shadow-sm animate-pulse"
+                                                            >
+                                                                <CalendarDaysIcon className="w-4 h-4 inline-block mr-1 mb-0.5" /> Join Interview (External)
+                                                            </a>
+                                                            <p className="text-xs text-center text-amber-600 font-medium mt-1">
+                                                                {new Date(app.interviewDetails.date).toLocaleString()}
+                                                            </p>
+                                                        </div>
+                                                    )
+                                                }
 
                                                 <div className="border-t border-slate-100 dark:border-slate-700 pt-3 flex justify-between items-center text-xs text-slate-400">
                                                     <span className="flex items-center gap-1">

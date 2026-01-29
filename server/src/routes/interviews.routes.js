@@ -43,7 +43,7 @@ router.get('/history', authenticate, async (req, res, next) => {
 // Save Completed Interview
 router.post('/save', authenticate, async (req, res, next) => {
   try {
-    const { role, transcript, score, feedback, duration } = req.body;
+    const { role, transcript, score, feedback, durationSeconds } = req.body;
 
     // Create new interview record
     const interview = await Interview.create({
@@ -52,7 +52,7 @@ router.post('/save', authenticate, async (req, res, next) => {
       transcript,
       overallScore: score,
       feedback,
-      duration, // Ensure model supports this or add it
+      durationSeconds,
       status: 'completed'
     });
 

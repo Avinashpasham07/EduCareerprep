@@ -30,7 +30,7 @@ export default function CollegeCard({
                     <div className="flex justify-between items-start">
                         <h4 className="font-bold text-lg text-slate-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{college.name}</h4>
                         <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-lg">
-                            {college.rating || '4.5'} <StarIconSolid className="w-3 h-3" />
+                            {college.avgRating > 0 ? college.avgRating.toFixed(1) : '0'} <StarIconSolid className="w-3 h-3" />
                         </span>
                     </div>
                     <div className="flex items-center gap-3 mt-2 text-xs text-slate-500 dark:text-slate-400 font-bold">
@@ -60,8 +60,10 @@ export default function CollegeCard({
                     )}
                 </div>
                 <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-xl border border-amber-100 dark:border-amber-800/30">
-                    <StarIcon className="w-4 h-4 text-amber-500 fill-current" />
-                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400">4.5</span>
+                    <StarIcon Solid className="w-4 h-4 text-amber-500 fill-current" />
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                        {college.avgRating > 0 ? college.avgRating.toFixed(1) : '4.5'}
+                    </span>
                 </div>
             </div>
 

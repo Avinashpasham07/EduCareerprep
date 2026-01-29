@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addCompletedInterview } from '../store/slices/userActionsSlice';
+import {
+  StopIcon,
+  MicrophoneIcon,
+  LightBulbIcon,
+  ClockIcon,
+  ChartBarIcon,
+  QuestionMarkCircleIcon,
+  CommandLineIcon,
+  CpuChipIcon,
+  TrophyIcon
+} from '@heroicons/react/24/outline';
 
 export default function Interviews() {
   const { user } = useSelector((s) => s.auth);
@@ -246,7 +257,7 @@ export default function Interviews() {
   const validateCodingAnswer = (testId) => {
     const test = currentInterview.codingTests.find(t => t.id === testId);
     const answer = codingAnswers[testId];
-    
+
     if (!answer || answer.trim() === '') {
       setAiValidation(prev => ({
         ...prev,
@@ -261,7 +272,7 @@ export default function Interviews() {
     // Simulate AI validation
     const validation = {
       isValid: Math.random() > 0.3, // 70% chance of being valid
-      feedback: Math.random() > 0.3 
+      feedback: Math.random() > 0.3
         ? "Great solution! Your code looks correct and handles the test cases properly."
         : "Your solution has some issues. Consider edge cases and algorithm efficiency.",
       suggestions: [
@@ -281,8 +292,8 @@ export default function Interviews() {
     // Enhanced AI feedback including coding test results
     const feedback = generateFeedback();
     const codingFeedback = generateCodingFeedback();
-    
-    const completeFeedback = `Interview Complete! 🎉
+
+    const completeFeedback = `Interview Complete!
 
 ${feedback}
 
@@ -296,9 +307,9 @@ Next Steps:
 • Practice areas where you need improvement
 • Take more interviews to build confidence
 • Focus on coding practice if technical roles`;
-    
+
     alert(completeFeedback);
-    
+
     // Dispatch action to update Redux store
     dispatch(addCompletedInterview({
       id: currentInterview.id,
@@ -308,7 +319,7 @@ Next Steps:
       score: Math.floor(Math.random() * 30) + 70, // Random score between 70-100
       feedback: feedback
     }));
-    
+
     // Reset interview
     setCurrentInterview(null);
     setCurrentQuestion(0);
@@ -324,9 +335,9 @@ Next Steps:
     const totalQuestions = currentInterview.questions.length;
     const answeredQuestions = Object.keys(answers).length;
     const completionRate = (answeredQuestions / totalQuestions) * 100;
-    
+
     let feedback = `Completion Rate: ${completionRate.toFixed(0)}%\n\n`;
-    
+
     if (completionRate >= 80) {
       feedback += "Excellent! You answered most questions comprehensively.\n";
     } else if (completionRate >= 60) {
@@ -334,13 +345,13 @@ Next Steps:
     } else {
       feedback += "Try to provide more complete answers in future interviews.\n";
     }
-    
+
     feedback += "\nTips for improvement:\n";
     feedback += "• Use the STAR method (Situation, Task, Action, Result)\n";
     feedback += "• Provide specific examples from your experience\n";
     feedback += "• Ask clarifying questions when needed\n";
     feedback += "• Practice common interview questions\n";
-    
+
     return feedback;
   };
 
@@ -352,11 +363,11 @@ Next Steps:
     const totalTests = currentInterview.codingTests.length;
     const completedTests = Object.keys(codingAnswers).length;
     const validTests = Object.values(aiValidation).filter(v => v.isValid).length;
-    
+
     let feedback = `\nCoding Test Results:\n`;
     feedback += `• Completed: ${completedTests}/${totalTests} tests\n`;
     feedback += `• Valid Solutions: ${validTests}/${completedTests} tests\n`;
-    
+
     if (validTests === completedTests && completedTests > 0) {
       feedback += `• Excellent coding skills! All solutions are correct.\n`;
     } else if (validTests > completedTests / 2) {
@@ -364,7 +375,7 @@ Next Steps:
     } else {
       feedback += `• Focus on algorithm practice and problem-solving techniques.\n`;
     }
-    
+
     return feedback;
   };
 
@@ -372,13 +383,13 @@ Next Steps:
     const totalQuestions = currentInterview.questions.length;
     const answeredQuestions = Object.keys(answers).length;
     const completionRate = (answeredQuestions / totalQuestions) * 100;
-    
+
     const totalTests = currentInterview.codingTests ? currentInterview.codingTests.length : 0;
     const completedTests = Object.keys(codingAnswers).length;
     const validTests = Object.values(aiValidation).filter(v => v.isValid).length;
-    
+
     let assessment = "";
-    
+
     if (completionRate >= 80 && (totalTests === 0 || validTests >= completedTests * 0.7)) {
       assessment = "🌟 Excellent performance! You demonstrated strong technical and communication skills.";
     } else if (completionRate >= 60 && (totalTests === 0 || validTests >= completedTests * 0.5)) {
@@ -386,7 +397,7 @@ Next Steps:
     } else {
       assessment = "📚 Keep practicing! Focus on the areas mentioned in the feedback.";
     }
-    
+
     return assessment;
   };
 
@@ -435,9 +446,9 @@ Next Steps:
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                  <div 
+                  <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   ></div>
@@ -452,7 +463,7 @@ Next Steps:
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   {test.description}
                 </h2>
-                
+
                 <div className="mb-6">
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">Test Cases:</h3>
                   <div className="space-y-2">
@@ -486,11 +497,10 @@ Next Steps:
 
               {/* AI Validation */}
               {validation && (
-                <div className={`mb-6 p-4 rounded-lg ${
-                  validation.isValid 
-                    ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                <div className={`mb-6 p-4 rounded-lg ${validation.isValid
+                    ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                     : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                }`}>
+                  }`}>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">
                     🤖 AI Validation Result
                   </h3>
@@ -559,9 +569,9 @@ Next Steps:
                   </span>
                 </div>
               </div>
-              
+
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
@@ -576,7 +586,7 @@ Next Steps:
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                 {question}
               </h2>
-              
+
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Your Answer
@@ -594,14 +604,15 @@ Next Steps:
               <div className="flex items-center gap-4 mb-6">
                 <button
                   onClick={toggleRecording}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    isRecording 
-                      ? 'bg-red-600 text-white hover:bg-red-700' 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isRecording
+                      ? 'bg-red-600 text-white hover:bg-red-700'
                       : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
-                  }`}
+                    }`}
                 >
-                  <span>{isRecording ? '⏹️' : '🎤'}</span>
-                  {isRecording ? 'Stop Recording' : 'Start Recording'}
+                  <span className="flex items-center gap-2">
+                    {isRecording ? <StopIcon className="w-5 h-5" /> : <MicrophoneIcon className="w-5 h-5" />}
+                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                  </span>
                 </button>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Recording helps AI analyze your speech patterns and provide better feedback
@@ -628,8 +639,9 @@ Next Steps:
 
           {/* Tips */}
           <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
-              💡 Interview Tips
+            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+              <LightBulbIcon className="w-5 h-5" />
+              Interview Tips
             </h3>
             <ul className="text-blue-800 dark:text-blue-200 space-y-1 text-sm">
               <li>• Use the STAR method: Situation, Task, Action, Result</li>
@@ -664,26 +676,25 @@ Next Steps:
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {interview.title}
                   </h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    interview.type === 'technical' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                    interview.type === 'analytical' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                    interview.type === 'behavioral' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                    interview.type === 'product' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
-                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${interview.type === 'technical' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                      interview.type === 'analytical' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                        interview.type === 'behavioral' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                          interview.type === 'product' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                    }`}>
                     {interview.type}
                   </span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-3">
                   {interview.role} at {interview.company}
                 </p>
-                
-                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  <span>⏱️ {interview.duration}</span>
-                  <span>📊 {interview.difficulty}</span>
-                  <span>❓ {interview.questions.length} questions</span>
+
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  <span className="flex items-center gap-1"><ClockIcon className="w-4 h-4" /> {interview.duration}</span>
+                  <span className="flex items-center gap-1"><ChartBarIcon className="w-4 h-4" /> {interview.difficulty}</span>
+                  <span className="flex items-center gap-1"><QuestionMarkCircleIcon className="w-4 h-4" /> {interview.questions.length} questions</span>
                   {interview.codingTests && interview.codingTests.length > 0 && (
-                    <span>💻 {interview.codingTests.length} coding tests</span>
+                    <span className="flex items-center gap-1"><CommandLineIcon className="w-4 h-4" /> {interview.codingTests.length} coding tests</span>
                   )}
                 </div>
               </div>
@@ -736,7 +747,7 @@ Next Steps:
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🤖</span>
+                <CpuChipIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">AI Analysis</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -745,7 +756,7 @@ Next Steps:
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🎤</span>
+                <MicrophoneIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Voice Recording</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -754,7 +765,7 @@ Next Steps:
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📊</span>
+                <ChartBarIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Progress Tracking</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -763,7 +774,7 @@ Next Steps:
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🎯</span>
+                <TrophyIcon className="w-8 h-8 text-orange-600 dark:text-orange-400" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Personalized Tips</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">

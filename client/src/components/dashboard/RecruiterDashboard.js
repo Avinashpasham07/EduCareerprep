@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { MegaphoneIcon } from '@heroicons/react/24/outline';
+import { MegaphoneIcon, BriefcaseIcon, GlobeAltIcon, BuildingLibraryIcon, AcademicCapIcon, RocketLaunchIcon, EnvelopeIcon, PhoneIcon, CalendarDaysIcon, DocumentTextIcon, UserIcon } from '@heroicons/react/24/outline';
 import { userApi } from '../../services/api';
-import Footer from '../common/Footer';
 import CompanyProfileEditor from './CompanyProfileEditor';
 import BroadcastModal from './BroadcastModal';
 
@@ -48,7 +47,7 @@ export default function RecruiterDashboard({ user }) {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-black font-sans selection:bg-blue-500/30">
-            {/* 🎩 Hero Section */}
+            {/* Hero Section */}
             <div className="relative bg-slate-50 dark:bg-black border-b border-slate-200 dark:border-white/10 pt-32 pb-20 px-6 sm:px-8 overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none">
@@ -113,7 +112,7 @@ export default function RecruiterDashboard({ user }) {
                 </div>
             </div>
 
-            {/* 📋 Main Content Area */}
+            {/* Main Content Area */}
             <div className="max-w-7xl mx-auto px-6 -mt-10 relative z-20 pb-20">
                 <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden min-h-[600px]">
 
@@ -169,7 +168,7 @@ export default function RecruiterDashboard({ user }) {
                     </div>
                 </div>
             </div>
-            <Footer />
+
 
             <BroadcastModal
                 isOpen={isBroadcastOpen}
@@ -197,9 +196,7 @@ function MyJobsTab({ jobs, loading, onPostNew, onManage }) {
 
     if (jobs.length === 0) return (
         <div className="text-center py-20">
-            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 text-slate-400">
-                💼
-            </div>
+            <BriefcaseIcon className="w-12 h-12 text-slate-400 mx-auto mb-6" />
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Active Listings</h3>
             <p className="text-slate-500 max-w-sm mx-auto mb-8">You haven't posted any jobs yet. Create your first listing to start evaluating candidates.</p>
             <button onClick={onPostNew} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30">
@@ -338,9 +335,9 @@ function PostJobForm({ onSuccess }) {
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Hiring Model</label>
                         <select {...register('hiringType')} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white appearance-none font-medium">
-                            <option value="general">🌍 General (Public)</option>
-                            <option value="on-campus">🏫 On-Campus Drive</option>
-                            <option value="off-campus">🎓 Off-Campus/Preferred</option>
+                            <option value="general">General (Public)</option>
+                            <option value="on-campus">On-Campus Drive</option>
+                            <option value="off-campus">Off-Campus/Preferred</option>
                         </select>
                     </div>
 
@@ -383,7 +380,7 @@ function PostJobForm({ onSuccess }) {
 
                 <div className="pt-4 flex items-center justify-end gap-4">
                     <button type="submit" disabled={isSubmitting} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-xl shadow-blue-500/20 transform transition-all hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
-                        {isSubmitting ? 'Publishing...' : '🚀 Publish Job Opening'}
+                        {isSubmitting ? 'Publishing...' : <><RocketLaunchIcon className="w-4 h-4 inline-block mr-1" /> Publish Job Opening</>}
                     </button>
                 </div>
             </form>
@@ -393,18 +390,23 @@ function PostJobForm({ onSuccess }) {
 
 function ManageCandidates({ job, onBack }) {
     const [localJob, setLocalJob] = useState(job);
+    const [schedulingUser, setSchedulingUser] = useState(null); // { userId, name }
 
-    const updateStatus = async (userId, status) => {
+    const updateStatus = async (userId, status, extraData = {}) => {
         try {
-            await userApi.updateApplicationStatus(job._id, userId, status);
+            await userApi.updateApplicationStatus(job._id, userId, { status, ...extraData });
             // Update local state
             setLocalJob(prev => ({
                 ...prev,
                 applications: prev.applications.map(app =>
-                    app.user._id === userId ? { ...app, status } : app
+                    app.user._id === userId ? { ...app, status, ...extraData } : app
                 )
             }));
-            alert(`Candidate marked as ${status}`);
+            if (status === 'interview') {
+                // No alert needed, modal closes
+            } else {
+                alert(`Candidate marked as ${status}`);
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to update status");
@@ -444,7 +446,12 @@ function ManageCandidates({ job, onBack }) {
                                         <div>
                                             <div className="flex items-center gap-3">
                                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{app.user?.name || 'Unknown Candidate'}</h3>
-                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${app.status === 'interview' ? 'bg-amber-100 text-amber-700' : app.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide 
+                                                    ${app.status === 'interview' ? 'bg-amber-100 text-amber-700' :
+                                                        app.status === 'hired' ? 'bg-green-100 text-green-700' :
+                                                            app.status === 'shortlisted' ? 'bg-blue-100 text-blue-700' :
+                                                                app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                                    'bg-slate-100 text-slate-700'}`}>
                                                     {app.status}
                                                 </span>
                                             </div>
@@ -455,16 +462,35 @@ function ManageCandidates({ job, onBack }) {
                                     {/* Contact Info */}
                                     <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-lg">📧</span>
+                                            <EnvelopeIcon className="w-4 h-4" />
                                             <span className="font-medium">{app.user?.email}</span>
                                         </div>
                                         {(app.user?.phone || app.user?.profile?.phone) && (
                                             <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-4">
-                                                <span className="text-lg">📞</span>
+                                                <PhoneIcon className="w-4 h-4" />
                                                 <span className="font-medium text-slate-900 dark:text-white tracking-wide">{app.user?.phone || app.user?.profile?.phone}</span>
                                             </div>
                                         )}
                                     </div>
+
+                                    {app.status === 'interview' && app.interviewDetails && (
+                                        <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <div>
+                                                <h4 className="font-bold text-amber-900 dark:text-amber-400 text-sm uppercase tracking-wide mb-1">Video Interview Scheduled</h4>
+                                                <p className="text-amber-700 dark:text-amber-300 font-medium">
+                                                    <CalendarDaysIcon className="w-4 h-4 inline-block mr-1" /> {new Date(app.interviewDetails.date).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <a
+                                                href={app.interviewDetails.meetingLink || `https://meet.google.com/new`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-sm shadow-lg shadow-amber-500/20 transition-all active:scale-95"
+                                            >
+                                                <CalendarDaysIcon className="w-4 h-4 inline-block mr-1" /> Open Meeting Link
+                                            </a>
+                                        </div>
+                                    )}
 
                                     {/* Cover Letter */}
                                     {app.coverLetter && (
@@ -484,48 +510,65 @@ function ManageCandidates({ job, onBack }) {
                                             rel="noreferrer"
                                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold hover:bg-emerald-100 transition-colors shadow-sm"
                                         >
-                                            📄 View Resume
+                                            <DocumentTextIcon className="w-4 h-4" /> View Resume
                                         </a>
                                         <Link
                                             to={`/profile/${app.user?._id}`}
                                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:indigo-500/30 text-indigo-700 dark:text-indigo-400 text-sm font-bold hover:bg-indigo-100 transition-colors shadow-sm"
                                         >
-                                            👤 View Overall Profile
+                                            <UserIcon className="w-4 h-4" /> View Overall Profile
                                         </Link>
-                                        <a href={`mailto:${app.user?.email}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
-                                            ✉️ {app.user?.email}
-                                        </a>
-                                        {(app.user?.phone || app.user?.profile?.phone) && (
-                                            <a href={`tel:${app.user?.phone || app.user?.profile?.phone}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
-                                                📞 {app.user?.phone || app.user?.profile?.phone}
-                                            </a>
-                                        )}
                                     </div>
                                 </div>
 
                                 {/* Status Actions */}
-                                <div className="flex flex-col gap-2 min-w-[140px]">
-                                    <button
-                                        onClick={() => updateStatus(app.user._id, 'interview')}
-                                        disabled={app.status === 'interview'}
-                                        className={`w-full py-3 px-4 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 ${app.status === 'interview'
-                                            ? 'bg-amber-100 text-amber-700 cursor-default ring-2 ring-amber-500 ring-offset-2 dark:ring-offset-slate-800'
-                                            : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-105 active:scale-95'
-                                            }`}
-                                    >
-                                        {app.status === 'interview' ? 'Shortlisted ✓' : 'Shortlist'}
-                                    </button>
+                                <div className="flex flex-col gap-2 min-w-[150px]">
+                                    {app.status === 'applied' && (
+                                        <button
+                                            onClick={() => updateStatus(app.user._id, 'shortlisted')}
+                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all active:scale-95"
+                                        >
+                                            Shortlist
+                                        </button>
+                                    )}
 
-                                    <button
-                                        onClick={() => updateStatus(app.user._id, 'rejected')}
-                                        disabled={app.status === 'rejected'}
-                                        className={`w-full py-3 px-4 rounded-xl font-bold text-sm border transition-all flex items-center justify-center gap-2 ${app.status === 'rejected'
-                                            ? 'bg-red-50 border-red-200 text-red-600 opacity-75 cursor-default'
-                                            : 'bg-white border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200 shadow-sm hover:shadow-md'
-                                            }`}
-                                    >
-                                        {app.status === 'rejected' ? 'Rejected ✕' : 'Reject'}
-                                    </button>
+                                    {(app.status === 'applied' || app.status === 'shortlisted') && (
+                                        <button
+                                            onClick={() => setSchedulingUser({ userId: app.user._id, name: app.user.name })}
+                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/20 transition-all active:scale-95"
+                                        >
+                                            Schedule Interview
+                                        </button>
+                                    )}
+
+                                    {app.status === 'interview' && (
+                                        <button
+                                            onClick={() => updateStatus(app.user._id, 'hired')}
+                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition-all active:scale-95 animate-pulse"
+                                        >
+                                            Hire Candidate!
+                                        </button>
+                                    )}
+
+                                    {app.status !== 'rejected' && app.status !== 'hired' && (
+                                        <button
+                                            onClick={() => updateStatus(app.user._id, 'rejected')}
+                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all"
+                                        >
+                                            Reject
+                                        </button>
+                                    )}
+
+                                    {app.status === 'hired' && (
+                                        <div className="w-full py-3 px-4 bg-green-100 text-green-700 font-bold text-sm rounded-xl text-center border border-green-200">
+                                            Hired
+                                        </div>
+                                    )}
+                                    {app.status === 'rejected' && (
+                                        <div className="w-full py-3 px-4 bg-red-50 text-red-500 font-bold text-sm rounded-xl text-center border border-red-200">
+                                            Rejected
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -536,6 +579,50 @@ function ManageCandidates({ job, onBack }) {
                     </div>
                 )}
             </div>
+
+            {/* Schedule Modal */}
+            {schedulingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-3xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Schedule Interview</h3>
+                        <p className="text-slate-500 mb-6 text-sm">Set the interview time and provide a link (Google Meet, Zoom, etc.) for <strong>{schedulingUser.name}</strong>.</p>
+
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.target);
+                            const date = formData.get('date');
+                            const time = formData.get('time');
+                            const meetingLink = formData.get('meetingLink');
+                            const combinedDate = new Date(`${date}T${time}`);
+
+                            updateStatus(schedulingUser.userId, 'interview', { date: combinedDate, meetingLink });
+                            setSchedulingUser(null);
+                        }}>
+                            <div className="space-y-4 mb-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Meeting Link</label>
+                                    <input type="url" name="meetingLink" placeholder="https://meet.google.com/xxx-xxxx-xxx" required className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-blue-500 text-sm" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Date</label>
+                                        <input type="date" name="date" required className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-blue-500 text-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Time</label>
+                                        <input type="time" name="time" required className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-blue-500 text-sm" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button type="button" onClick={() => setSchedulingUser(null)} className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">Cancel</button>
+                                <button type="submit" className="flex-1 py-3 font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all">Schedule</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

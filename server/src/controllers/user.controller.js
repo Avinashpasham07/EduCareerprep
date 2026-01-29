@@ -1,29 +1,7 @@
 const User = require('../models/User');
+const CollegeReview = require('../models/Review');
+const mongoose = require('mongoose');
 
-
-// Helper: Award XP and Check Level Up
-const awardXP = async (userId, amount) => {
-    const user = await User.findById(userId);
-    if (!user) return;
-
-    // Initialize if missing
-    if (!user.gamification) {
-        user.gamification = { xp: 0, level: 1, badges: [] };
-    }
-
-    user.gamification.xp += amount;
-
-    // Level Calculation: Simple: Level = Floor(XP / 100) + 1
-    const newLevel = Math.floor(user.gamification.xp / 100) + 1;
-
-    if (newLevel > user.gamification.level) {
-        user.gamification.level = newLevel;
-        // Could enable a notification here for "Level Up!"
-    }
-
-    await user.save();
-    return user.gamification;
-};
 
 // --- Persistence Features ---
 exports.saveAssessment = async (req, res, next) => {
@@ -46,15 +24,13 @@ exports.saveAssessment = async (req, res, next) => {
 
         if (existingIndex > -1) {
             user.completedAssessments[existingIndex] = newEntry;
+            await user.save();
         } else {
             user.completedAssessments.push(newEntry);
             // Award XP for new assessment
-            user.gamification.xp += 100; // Direct update since we are saving user anyway
-            const newLevel = Math.floor(user.gamification.xp / 100) + 1;
-            user.gamification.level = newLevel;
+            await user.awardXP(100);
         }
 
-        await user.save();
         res.json({ success: true, completedAssessments: user.completedAssessments });
     } catch (err) {
         next(err);
@@ -144,11 +120,40 @@ exports.getApplications = async (req, res, next) => {
             .select('appliedJobs')
             .populate({
                 path: 'appliedJobs.job',
-                select: 'title company type location salary'
+                select: 'title company type location salary applications' // temporarily fetch applications to find self
             });
 
         if (!user) return res.status(404).json({ message: "User not found" });
-        res.json(user.appliedJobs || []);
+
+        // Transform applications to include interviewDetails from the Job model
+        const applications = user.appliedJobs.map(app => {
+            const job = app.job;
+            if (!job) return app;
+
+            // Find the specific application in the job's applications array
+            // Note: app.job is populated, so it's an object. 
+            // However, we shouldn't expose all applications to the client.
+            // We'll process this on server and return clean object.
+
+            const jobApp = job.applications?.find(a => a.user.toString() === userId.toString());
+
+            let interviewDetails = null;
+            if (jobApp && jobApp.interviewDetails) {
+                interviewDetails = jobApp.interviewDetails;
+            }
+
+            // Return a clean object, omitting the full 'applications' array from job
+            const { applications, ...cleanJob } = job.toObject();
+
+            return {
+                ...app.toObject(),
+                job: cleanJob,
+                interviewDetails,
+                status: app.status || (jobApp ? jobApp.status : 'applied') // Prioritize User status for Student Kanban
+            };
+        });
+
+        res.json(applications);
     } catch (err) {
         next(err);
     }
@@ -188,7 +193,7 @@ exports.getLeaderboard = async (req, res, next) => {
         })
             .sort({ 'gamification.xp': -1 })
             .limit(10)
-            .select('name profile.collegeId gamification');
+            .select('name profile.location profile.collegeId gamification');
 
         // Populate College Name if possible
         // Note: Since collegeId is a reference in profile, we can populate it
@@ -203,18 +208,47 @@ exports.getLeaderboard = async (req, res, next) => {
 // Get user profile
 exports.getProfile = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id)
+        const userId = req.user.id;
+        const user = await User.findById(userId)
             .select('-passwordHash')
             .populate('savedColleges', 'name profile.location profile.collegeProfile.logo')
             .populate('savedJobs', 'title company location type salary')
             .populate({
                 path: 'appliedJobs.job',
-                select: 'title company location type salary'
+                select: 'title company location type salary applications' // temporary applications fetch
             })
             .populate('profile.collegeId', 'name profile.location');
 
         if (!user) return res.status(404).json({ message: 'User not found' });
-        res.json(user);
+
+        // Transform appliedJobs to include interviewDetails from Job model
+        const transformedAppliedJobs = user.appliedJobs.map(app => {
+            const job = app.job;
+            if (!job) return app;
+
+            const jobApp = job.applications?.find(a => a.user.toString() === userId.toString());
+
+            let interviewDetails = null;
+            if (jobApp && jobApp.interviewDetails) {
+                interviewDetails = jobApp.interviewDetails;
+            }
+
+            // Expose a clean job object without all applications
+            const { applications, ...cleanJob } = job.toObject();
+
+            return {
+                ...app.toObject(),
+                job: cleanJob,
+                interviewDetails,
+                status: app.status || (jobApp ? jobApp.status : 'applied')
+            };
+        });
+
+        // Convert user to object and update appliedJobs
+        const userObj = user.toObject();
+        userObj.appliedJobs = transformedAppliedJobs;
+
+        res.json(userObj);
     } catch (err) {
         next(err);
     }
@@ -298,30 +332,67 @@ exports.getColleges = async (req, res, next) => {
             .select('name email profile.location profile.collegeProfile profile.managedColleges')
             .lean();
 
+        // 1. Collect all college IDs (primary and managed)
+        const allCollegeIds = [];
+        counselors.forEach(c => {
+            if (c.profile?.collegeProfile) allCollegeIds.push(c._id);
+            if (c.profile?.managedColleges) {
+                c.profile.managedColleges.forEach(mc => allCollegeIds.push(mc._id || mc.id));
+            }
+        });
+
+        // 2. Fetch average ratings for all these colleges at once
+        const ratings = await CollegeReview.aggregate([
+            { $match: { collegeId: { $in: allCollegeIds } } },
+            {
+                $group: {
+                    _id: "$collegeId",
+                    avgRating: { $avg: "$rating" },
+                    reviewCount: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Map ratings for easy lookup
+        const ratingMap = {};
+        ratings.forEach(r => {
+            ratingMap[r._id.toString()] = {
+                avgRating: Math.round(r.avgRating * 10) / 10,
+                reviewCount: r.reviewCount
+            };
+        });
+
         let allColleges = [];
 
         counselors.forEach(c => {
             // Add primary profile if exists
             if (c.profile?.collegeProfile && c.name) {
+                const r = ratingMap[c._id.toString()] || { avgRating: 0, reviewCount: 0 };
                 allColleges.push({
                     id: c._id, // Use User ID for primary
                     name: c.name,
                     location: c.profile?.location,
                     ...c.profile?.collegeProfile,
                     email: c.email,
-                    isPrimary: true
+                    isPrimary: true,
+                    avgRating: r.avgRating,
+                    reviewCount: r.reviewCount
                 });
             }
 
             // Add managed ones
             if (c.profile?.managedColleges?.length > 0) {
                 c.profile.managedColleges.forEach(mc => {
+                    const collegeId = mc._id || mc.id;
+                    const r = ratingMap[collegeId.toString()] || { avgRating: 0, reviewCount: 0 };
                     allColleges.push({
                         ...mc,
-                        id: mc._id || mc.id,
+                        id: collegeId,
                         counselorId: c._id,
                         email: c.email,
-                        isPrimary: false
+                        isPrimary: false,
+                        avgRating: r.avgRating,
+                        reviewCount: r.reviewCount
                     });
                 });
             }
@@ -340,16 +411,26 @@ exports.getCollegeById = async (req, res, next) => {
 
         // 1. Try finding by User ID (Primary College)
         const primary = await User.findById(id)
-            .select('name email profile.location profile.collegeProfile')
+            .select('name email role profile.location profile.collegeProfile')
             .lean();
 
         if (primary && primary.role === 'counselor') {
+            // Fetch reviews for primary college
+            const reviews = await CollegeReview.find({ collegeId: new mongoose.Types.ObjectId(id) }).sort({ createdAt: -1 });
+            const avgRating = reviews.length > 0
+                ? Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length * 10) / 10
+                : 0;
+
             return res.json({
                 id: primary._id,
                 name: primary.name,
                 email: primary.email,
+                role: primary.role,
                 location: primary.profile?.location,
                 ...primary.profile?.collegeProfile,
+                reviews,
+                avgRating,
+                reviewCount: reviews.length
             });
         }
 
@@ -361,10 +442,19 @@ exports.getCollegeById = async (req, res, next) => {
         if (counselor) {
             const college = counselor.profile.managedColleges.find(c => c._id.toString() === id);
             if (college) {
+                // Fetch reviews for managed college
+                const reviews = await CollegeReview.find({ collegeId: new mongoose.Types.ObjectId(id) }).sort({ createdAt: -1 });
+                const avgRating = reviews.length > 0
+                    ? Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length * 10) / 10
+                    : 0;
+
                 return res.json({
                     ...college,
                     id: college._id,
-                    email: counselor.email
+                    email: counselor.email,
+                    reviews,
+                    avgRating,
+                    reviewCount: reviews.length
                 });
             }
         }
@@ -375,7 +465,43 @@ exports.getCollegeById = async (req, res, next) => {
     }
 };
 
-// Toggle Save/Unsave College
+// Add review for a college
+exports.addReview = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const collegeIdStr = req.params.id;
+        const { rating, comment } = req.body;
+
+        if (!rating || !comment) {
+            return res.status(400).json({ message: 'Rating and comment are required' });
+        }
+
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(collegeIdStr)) {
+            return res.status(400).json({ message: 'Invalid college ID format' });
+        }
+        const collegeId = new mongoose.Types.ObjectId(collegeIdStr);
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const newReview = new CollegeReview({
+            collegeId,
+            userId,
+            userName: user.name,
+            rating: Number(rating),
+            comment: String(comment).trim()
+        });
+
+        const savedReview = await newReview.save();
+        res.status(201).json(savedReview);
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.toggleSaveCollege = async (req, res, next) => {
     try {
         const userId = req.user.id;
@@ -383,7 +509,6 @@ exports.toggleSaveCollege = async (req, res, next) => {
 
         const user = await User.findById(userId);
 
-        // Check if already saved
         const isSaved = user.savedColleges.includes(collegeId);
 
         if (isSaved) {
@@ -453,7 +578,7 @@ exports.getDashboardStats = async (req, res, next) => {
             if (user.profile?.location) score += 10;
             if (user.profile?.bio) score += 10;
             if (user.profile?.skills?.length > 0) score += 20;
-            if (user.profile?.resume) score += 20;
+            if (user.profile?.resumeLink) score += 20;
             if (user.profile?.education?.length > 0) score += 20;
             if (score > 100) score = 100;
 
@@ -482,11 +607,7 @@ exports.markChallengeSolved = async (req, res, next) => {
             user.solvedChallenges.push(challengeId);
 
             // Award XP
-            if (!user.gamification) user.gamification = { xp: 0, level: 1 };
-            user.gamification.xp += 50;
-            user.gamification.level = Math.floor(user.gamification.xp / 100) + 1;
-
-            await user.save();
+            await user.awardXP(50);
         }
 
         res.json({ success: true, solvedChallenges: user.solvedChallenges, gamification: user.gamification });

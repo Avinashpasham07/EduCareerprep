@@ -9,7 +9,11 @@ import {
     AcademicCapIcon,
     SparklesIcon,
     CheckCircleIcon,
-    GiftIcon
+    GiftIcon,
+    BuildingLibraryIcon,
+    CalendarDaysIcon,
+    TrophyIcon,
+    XCircleIcon
 } from '@heroicons/react/24/outline';
 
 const JobDetailModal = ({ job, onClose, onApply, onSave, isApplied, isSaved }) => {
@@ -29,7 +33,7 @@ const JobDetailModal = ({ job, onClose, onApply, onSave, isApplied, isSaved }) =
                                 <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{job.title}</h2>
                                 {job.hiringType && job.hiringType !== 'general' && (
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${job.hiringType === 'on-campus' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'}`}>
-                                        {job.hiringType === 'on-campus' ? '🏫 On-Campus' : '🎓 Off-Campus'}
+                                        {job.hiringType === 'on-campus' ? <><BuildingLibraryIcon className="w-3 h-3 inline-block mr-1 mb-0.5" /> On-Campus</> : <><AcademicCapIcon className="w-3 h-3 inline-block mr-1 mb-0.5" /> Off-Campus</>}
                                     </span>
                                 )}
                             </div>
@@ -94,7 +98,7 @@ const JobDetailModal = ({ job, onClose, onApply, onSave, isApplied, isSaved }) =
                                     <div className="flex flex-wrap gap-2">
                                         {job.benefits.map((benefit, i) => (
                                             <span key={i} className="px-4 py-2 rounded-xl bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 text-sm font-bold border border-pink-100 dark:border-pink-500/20">
-                                                ✨ {benefit}
+                                                <SparklesIcon className="w-3 h-3 inline-block mr-1 mb-0.5" /> {benefit}
                                             </span>
                                         ))}
                                     </div>
@@ -149,26 +153,37 @@ const JobDetailModal = ({ job, onClose, onApply, onSave, isApplied, isSaved }) =
                         <button
                             onClick={onApply}
                             disabled={isApplied}
-                            className={`flex-1 py-4 rounded-2xl font-black text-lg uppercase tracking-wider transition-all shadow-xl flex justify-center items-center gap-3 ${isApplied
-                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
-                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 hover:-translate-y-1'
+                            className={`flex-[2] md:flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-lg uppercase tracking-wider transition-all shadow-xl flex justify-center items-center gap-1.5 md:gap-3 ${isApplied
+                                ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 hover:-translate-y-1'
                                 }`}
                         >
-                            <BriefcaseIcon className="w-6 h-6" />
-                            {isApplied ? 'Application Submitted' : 'Apply Now Virtual'}
+                            {isApplied ? (
+                                (() => {
+                                    switch (job.status) {
+                                        case 'shortlisted': return <><SparklesIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Shortlisted</>;
+                                        case 'interview': return <><CalendarDaysIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Interview Scheduled</>;
+                                        case 'hired': return <><TrophyIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Selected / Hired</>;
+                                        case 'rejected': return <><XCircleIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Application Rejected</>;
+                                        default: return <><CheckCircleIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Application Submitted</>;
+                                    }
+                                })()
+                            ) : (
+                                <><BriefcaseIcon className="w-4 h-4 md:w-6 md:h-6 shrink-0" /> Apply Now Virtual</>
+                            )}
                         </button>
                     )}
 
                     {onSave && (
                         <button
                             onClick={onSave}
-                            className={`px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 border-2 transition-all ${isSaved
-                                    ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500 text-emerald-600 shadow-lg'
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600'
+                            className={`flex-1 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black flex items-center justify-center gap-2 border-2 transition-all text-xs md:text-base ${isSaved
+                                ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500 text-emerald-600 shadow-lg'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600'
                                 }`}
                         >
-                            <BookmarkIcon className={`w-6 h-6 ${isSaved ? 'fill-current' : ''}`} />
-                            {isSaved ? 'Saved' : 'Save'}
+                            <BookmarkIcon className={`w-4 h-4 md:w-6 md:h-6 ${isSaved ? 'fill-current' : ''} shrink-0`} />
+                            <span>{isSaved ? 'Saved' : 'Save'}</span>
                         </button>
                     )}
 

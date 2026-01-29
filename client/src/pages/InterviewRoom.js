@@ -216,13 +216,9 @@ export default function InterviewRoom() {
     const endInterview = async () => {
         // Calculate average score from AI feedback messages
         const scores = transcript.filter(t => t.score).map(t => t.score);
-        const avgScore = scores.length > 0
-            ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) // Scale 0-10 to 0-100 if needed, usually analysis is 1-10?
-            // Wait, geminiService returns 0-10 for single answer? Let's assume it returns 0-10.
-            // Actually geminiService returns "score" which is 3, 5, 8, 9 depending on heuristics. This is out of 10.
+        const finalScore = scores.length > 0
+            ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) // Scale 1-10 to percentage (0-100)
             : 0;
-
-        const finalScore = avgScore * 10; // Convert to percentage
 
         try {
             const token = localStorage.getItem('accessToken');
@@ -234,7 +230,7 @@ export default function InterviewRoom() {
                     transcript: transcript,
                     score: finalScore || 75, // Default if no answers
                     feedback: { summary: "Completed specific domain interview" },
-                    duration: elapsedTime // Send seconds
+                    durationSeconds: elapsedTime // Send seconds
                 })
             });
         } catch (e) {

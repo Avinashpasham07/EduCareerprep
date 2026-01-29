@@ -25,6 +25,7 @@ router.post('/analyze-profile', authenticate, userController.analyzeProfile);
 router.get('/colleges', userController.getColleges);
 router.get('/colleges/:id', userController.getCollegeById);
 router.post('/colleges/save/:id', authenticate, userController.toggleSaveCollege);
+router.post('/colleges/review/:id', authenticate, userController.addReview);
 
 // Stats & Challenges
 router.get('/dashboard-stats', authenticate, userController.getDashboardStats);
