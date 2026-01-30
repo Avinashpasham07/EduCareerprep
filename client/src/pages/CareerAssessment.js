@@ -24,6 +24,16 @@ const ICON_MAP = {
     CpuChipIcon: CpuChipIcon
 };
 
+// Utility to shuffle arrays (Fisher-Yates)
+const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
 export default function CareerAssessment() {
     const { user } = useSelector((s) => s.auth);
     const dispatch = useDispatch();
@@ -41,7 +51,18 @@ export default function CareerAssessment() {
     }, []);
 
     const startAssessment = (assessment) => {
-        setCurrentAssessment(assessment);
+        // Deep clone and shuffle questions AND their respective options
+        const randomizedQuestions = shuffleArray(assessment.questions).map(q => ({
+            ...q,
+            options: shuffleArray(q.options)
+        }));
+
+        const randomizedAssessment = {
+            ...assessment,
+            questions: randomizedQuestions
+        };
+
+        setCurrentAssessment(randomizedAssessment);
         setCurrentQuestion(0);
         setAnswers({});
     };

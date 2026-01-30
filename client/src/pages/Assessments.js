@@ -39,6 +39,16 @@ const ICON_MAP = {
   BeakerIcon: BeakerIcon
 };
 
+// Utility to shuffle arrays (Fisher-Yates)
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 export default function Assessments() {
   const { user } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
@@ -72,16 +82,27 @@ export default function Assessments() {
   }, [activeCategory, activeDifficulty, assessments]);
 
   const startAssessment = (assessment) => {
-    setCurrentAssessment(assessment);
+    // Deep clone and shuffle questions AND their respective options
+    const randomizedQuestions = shuffleArray(assessment.questions).map(q => ({
+      ...q,
+      options: shuffleArray(q.options)
+    }));
+
+    const randomizedAssessment = {
+      ...assessment,
+      questions: randomizedQuestions
+    };
+
+    setCurrentAssessment(randomizedAssessment);
     setCurrentQuestion(0);
     setAnswers({});
     setShowResult(false);
     setResultData(null);
   };
 
-  const handleAnswer = (questionId, index) => {
+  const handleAnswer = (questionId, optionLabel) => {
     if (answers[questionId] !== undefined) return;
-    setAnswers(prev => ({ ...prev, [questionId]: index }));
+    setAnswers(prev => ({ ...prev, [questionId]: optionLabel }));
   };
 
   const nextQuestion = () => {
@@ -95,8 +116,9 @@ export default function Assessments() {
   const finishAssessment = () => {
     let score = 0;
     currentAssessment.questions.forEach(q => {
-      const selectedIdx = answers[q.id];
-      if (selectedIdx !== undefined && q.options[selectedIdx]?.value === 1) {
+      const selectedLabel = answers[q.id];
+      const selectedOption = q.options.find(opt => opt.label === selectedLabel);
+      if (selectedOption?.value === 1) {
         score++;
       }
     });
@@ -182,7 +204,7 @@ export default function Assessments() {
               <div className="space-y-4">
                 {question.options.map((opt, idx) => {
                   const isAnswered = answers[question.id] !== undefined;
-                  const isSelected = answers[question.id] === idx;
+                  const isSelected = answers[question.id] === opt.label;
                   const isCorrect = opt.value === 1;
 
                   let btnClass = 'border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300';
@@ -200,10 +222,10 @@ export default function Assessments() {
                   return (
                     <button
                       key={idx}
-                      onClick={() => handleAnswer(question.id, idx)}
+                      onClick={() => handleAnswer(question.id, opt.label)}
                       disabled={isAnswered}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group
-                        ${btnClass}`}
+                          ${btnClass}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="font-medium">{opt.label}</span>
@@ -211,7 +233,7 @@ export default function Assessments() {
                         {isAnswered && isSelected && !isCorrect && <XCircleIcon className="w-5 h-5 text-red-500" />}
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
-                        ${isSelected
+                          ${isSelected
                           ? (isCorrect ? 'border-green-500' : 'border-red-500')
                           : 'border-slate-300 group-hover:border-primary-400'
                         }`}>
@@ -381,7 +403,7 @@ export default function Assessments() {
                     {resultData.percentage >= 60 ? (
                       <TrophyIcon className="w-12 h-12 text-yellow-300" />
                     ) : (
-                      <ArrowPathIcon className="w-12 h-12 text-white" /> 
+                      <ArrowPathIcon className="w-12 h-12 text-white" />
                     )}
                   </div>
 
