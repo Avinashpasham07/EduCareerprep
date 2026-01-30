@@ -57,7 +57,7 @@ const notificationSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Add indices for performance
+ 
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ targetCollege: 1, createdAt: -1 });
 notificationSchema.index({ isGlobal: 1, createdAt: -1 });
