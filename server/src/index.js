@@ -34,7 +34,7 @@ async function start() {
 
     server.listen(PORT, () => {
       // eslint-disable-next-line no-console
-      console.log(`API running on http://localhost:${PORT}`);
+      console.log(`API running on port ${PORT}`);
     });
   } catch (error) {
     // eslint-disable-next-line no-console

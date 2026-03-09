@@ -42,8 +42,12 @@ app.use(morgan('dev'));
 // app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }));
 app.use('/uploads', express.static(require('path').join(process.cwd(), 'uploads')));
 
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'EduCareerPrep API is running' });
+});
+
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Added for cron-job.org to keep server awake

@@ -293,9 +293,8 @@ export default function InterviewDashboard() {
                         </div>
                     )}
                 </div>
-
             </div>
-
         </div>
     );
 }
+
